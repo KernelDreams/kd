@@ -1,0 +1,85 @@
+RP — story string SillyTavern шаблоном (session-document-spec §5.2). Текст до
+первого %-узла — комментарий. Порядок блоков — текст файла: скопируй к себе в
+envs/profiles/ и переставляй (профиль: `$template: rp.mds`).
+
+Порядок system — как у `assembleRp` (паритет, §8): лор до карточки, главный
+промпт (`card`: ручной `meta.prompt.pre` → `system_prompt` карты с {{original}}
+= промпт агента → промпт агента), платформенные блоки, поля карты, лор после,
+персона игрока, блок участников. Вставки на глубине считаются от конца ленты
+(история и хвост после неё). Лорбук v2: `lore.before`/`lore.after` — книги
+`prefix`; `lore.sticky` — закреплённые записи после своей реплики (`after` — id узла
+истории), `lore.once` — после последнего сообщения истории, до хвоста агента.
+Заметки редактора (CYOA): `editor.notes` — после реплики игрока хода, той же
+ролью, что `$lore_role`; у impersonate их нет.
+
+Бот и сборка: переменные пресета — `vars.top` (в system), `vars.tail` (блок
+формы в хвосте), `vars.last` (жёсткие — после PHI карты, последними); значения —
+`vars.<id>` для условий. Заметки чата — `notes.tail` и `notes.depth`; `form` — заметка
+формы экземпляра бота (карта не трогается). Без объявленных переменных и заметок
+блоки пусты — промпт прежний.
+
+Группа ( §9): `group_layout` агента — `actor` (как было: карта говорящего наверху),
+`narrator` (`group.top` — все карты наверху, один кэш), `tail` (карта говорящего — `group.tail`
+в хвосте, верх общий). Одиночной сессии не касается (`group.split` — ложь).
+
+Impersonate (модель пишет за игрока) — своя ветка: главный промпт —
+`system_prompt` персоны игрока, нет — нейтральный `agent.impersonate_pre`;
+GM-инструкции агента и карты бота (`agent.pre | card`, примеры, блок участников)
+не идут — они велят не писать за игрока. Факты мира (описание бота, сценарий,
+лор, персона) — те же. Хвост — инструкция `$impersonate` профиля с тайными
+полями персоны (`post_history_instructions` — после неё), без хвоста бота и
+вставок на глубине.
+
+%system
+<{ if turn.impersonate }>
+<< player.system_prompt | default(agent.impersonate_pre) >>
+<< lore.before >>
+<< card.description | label(char ~ "'s Persona") >>
+<< card.personality | label('Personality') >>
+<< card.scenario | greeting | label('Scenario') >>
+<< lore.after >>
+<< persona >>
+<{ else }>
+<< lore.before >>
+<< agent.pre | card >>
+<< base >>
+<{ if group.split }>
+<< group.top >>
+<{ else }>
+<< card.description | label(char ~ "'s Persona") >>
+<< card.personality | label('Personality') >>
+<< card.scenario | greeting | label('Scenario') >>
+<< card.mes_example | label('Example dialogue:', '\n') >>
+<{ endif }>
+<< vars.top >>
+<< lore.after >>
+<< persona >>
+<< cast >>
+<{ endif }>
+
+<{ history }>
+<{ if not turn.impersonate }>
+<{ inject at=card.extensions.depth_prompt.depth role=card.extensions.depth_prompt.role source='card.depth_prompt' }><< card.extensions.depth_prompt.prompt >><{ endinject }>
+<{ inject at=meta.depthPrompt.depth role=meta.depthPrompt.role source='depth_prompt' }><< meta.depthPrompt.prompt >><{ endinject }>
+<{ for e in lore.depth }><{ inject at=e.depth role=e.role source=e.source reason=e.reason }><< e.content >><{ endinject }><{ endfor }>
+<{ for e in lore.sticky }><{ inject after=e.after role=e.role send=e.send merge=e.merge source=e.source reason=e.reason }><< e.content >><{ endinject }><{ endfor }>
+<{ for e in lore.once }><{ inject after=e.after role=e.role send=e.send merge=e.merge source=e.source reason=e.reason }><< e.content >><{ endinject }><{ endfor }>
+<{ for e in editor.notes }><{ inject after=e.after role=e.role send=e.send source=e.source reason=e.reason }><< e.content >><{ endinject }><{ endfor }>
+<{ for e in notes.depth }><{ inject at=e.depth role=e.role source=e.source }><< e.content >><{ endinject }><{ endfor }>
+<{ endif }>
+<{ endhistory }>
+
+%user
+<{ if not turn.impersonate }>
+<< group.tail >>
+<< notes.tail >>
+<< form >>
+<< vars.tail >>
+<< agent.post | post >>
+<< vars.last >>
+<{ endif }>
+<{ impersonate }>
+<{ if turn.impersonate }>
+<< vars.tail >>
+<< vars.last >>
+<{ endif }>

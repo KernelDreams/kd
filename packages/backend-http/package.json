@@ -1,0 +1,72 @@
+{
+  "name": "@kerneldreams/backend-http",
+  "version": "0.1.0",
+  "description": "HTTP transport for the UI protocol: serveBackend (node:http + SSE), createHttpBackend (fetch), store-backed backend, hub of engines, users gate with pluggable sign-in.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/backend-http"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./serve": {
+      "types": "./dist/serve.d.ts",
+      "import": "./dist/serve.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
+    },
+    "./store": {
+      "types": "./dist/store.d.ts",
+      "import": "./dist/store.js"
+    },
+    "./objects": {
+      "types": "./dist/objects.d.ts",
+      "import": "./dist/objects.js"
+    },
+    "./links": {
+      "types": "./dist/links.d.ts",
+      "import": "./dist/links.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "node -e \"const p=require('./package.json');const bad=Object.entries({...p.dependencies,...p.peerDependencies}).filter(([,v])=>String(v).startsWith('file:'));if(bad.length){console.error('publish blocked: file: deps '+bad.map(([k])=>k).join(', '));process.exit(1)}\""
+  },
+  "dependencies": {
+    "@kerneldreams/chat-client": "0.1.0",
+    "@kerneldreams/chat-store": "0.1.0",
+    "@kerneldreams/host-agent": "0.1.0",
+    "@kerneldreams/nrd": "0.1.0",
+    "@kerneldreams/ui-protocol": "0.1.0"
+  },
+  "optionalDependencies": {
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@kerneldreams/backend-local": "0.1.0",
+    "@types/node": "^24.19.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

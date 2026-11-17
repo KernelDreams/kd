@@ -1,0 +1,52 @@
+{
+  "name": "@kerneldreams/pty",
+  "version": "0.1.0",
+  "description": "Shared terminal for a human and an agent: tmux session per terminal, node-pty attach for the screen, pipe-pane agent stream, OSC 133 command marks, run/read API, WebSocket attach.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/pty"
+  },
+  "keywords": [
+    "terminal",
+    "tmux",
+    "node-pty",
+    "osc-133",
+    "agent"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "shell",
+    "README.md"
+  ],
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "node -e \"const p=require('./package.json');const bad=Object.entries({...p.dependencies,...p.peerDependencies}).filter(([,v])=>String(v).startsWith('file:'));if(bad.length){console.error('publish blocked: file: deps '+bad.map(([k])=>k).join(', '));process.exit(1)}\""
+  },
+  "dependencies": {
+    "node-pty": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

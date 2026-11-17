@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>nr-chat — local (без сервера)</title>
+  <style>
+    body { margin: 0; font: 14px system-ui, sans-serif; background: #f4f4f6; color: #222; display: grid; grid-template-columns: 1fr 300px; grid-template-rows: auto 1fr; height: 100vh; }
+    header { grid-column: 1 / 3; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 16px; }
+    header h1 { font-size: 16px; margin: 0 12px 0 0; }
+    input, select, button { font: inherit; padding: 5px 8px; border: 1px solid #ccc; border-radius: 6px; background: #fff; }
+    button { cursor: pointer; }
+    button.primary { background: #2f6fed; color: #fff; border-color: #2f6fed; }
+    main { padding: 0 8px 16px 16px; min-height: 0; }
+    nr-chat { height: 100%; }
+    aside { padding: 0 16px 16px 8px; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+    #files { flex: 1; overflow: auto; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 8px; font: 12px ui-monospace, monospace; white-space: pre; margin: 0; }
+    small { color: #666; }
+  </style>
+  <script type="module" src="../dist/nr-chat.js"></script>
+</head>
+<body>
+  <header>
+    <h1>&lt;nr-chat backend="local"&gt;</h1>
+    <input id="purl" placeholder="provider-url (…/v1)" size="28">
+    <input id="pkey" placeholder="provider-key" type="password" size="14">
+    <input id="skey" placeholder="ключ skillbox" type="password" size="12">
+    <select id="profile">
+      <option value="agent">agent — файлы проекта</option>
+      <option value="chat">chat — без тулов</option>
+      <option value="skills">skills — скиллы skillbox</option>
+      <option value="agent-exec">agent-exec — с exec в профиле</option>
+    </select>
+    <button id="connect" class="primary">Подключить</button>
+    <button id="fresh">Новая сессия</button>
+    <small id="state"></small>
+  </header>
+  <main><nr-chat id="chat" lang="ru"></nr-chat></main>
+  <aside>
+    <strong>Проект (/project)</strong>
+    <pre id="files" data-testid="files"></pre>
+    <button id="zip" data-testid="zip">Скачать zip</button>
+    <button id="mds" data-testid="mds">Экспорт .mds сессии</button>
+    <button id="reset">Стереть всё (OPFS, IndexedDB)</button>
+  </aside>
+  <script type="module">
+    // Бэкенд — в этой странице (/local-backend/browser.js, статика scripts/serve-static.mjs, NR_CHAT_LOCAL_BACKEND_DIST):
+    // сессии и проект — OPFS (запасной — IndexedDB), без сервера и без exec.
+    // Параметры: ?provider=<…/v1>&key=<ключ>&skillbox-key=<ключ>&skillbox=<url>&profile=<id>; иначе — поля (запоминаются в localStorage).
+    // skillbox — напрямую (CORS на /mcp), без прокси статики; адрес — только параметром ?skillbox=<url>.
+    const q = new URLSearchParams(location.search)
+    const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k) ?? undefined; localStorage.setItem(k, v) } catch {} }
+    const $ = (id) => document.getElementById(id)
+    $('purl').value = q.get('provider') ?? store('nr-local.provider') ?? ''
+    $('pkey').value = q.get('key') ?? store('nr-local.key') ?? ''
+    $('skey').value = q.get('skillbox-key') ?? store('nr-local.skillbox-key') ?? ''
+    $('profile').value = q.get('profile') ?? store('nr-local.profile') ?? 'agent'
+    const chat = $('chat')
+
+    const AGENT_TOOLS = ['read', 'ls', 'find', 'grep', 'write', 'edit', 'apply_patch', 'ask_user']
+    const profiles = [
+      { id: 'agent', name: 'Agent', description: 'Правит проект в OPFS', tools: AGENT_TOOLS, systemPrompt: 'You edit a small web project in the workspace (/project). Use the file tools; paths are relative to the workspace.', extra: { tool_policy: "{write: 'ask', edit: 'ask', apply_patch: 'ask'}" } },
+      { id: 'chat', name: 'Chat', tools: 'none' },
+      { id: 'skills', name: 'Skills', tools: ['read'], extra: { skills: 'all' } },
+      { id: 'agent-exec', name: 'Agent + exec', tools: [...AGENT_TOOLS, 'exec', 'process'], systemPrompt: 'You edit a small web project in the workspace. If a tool you need is not available, say so and continue with the tools you have.' },
+    ]
+
+    function connect(session) {
+      const provider = $('purl').value.trim()
+      if (!provider) return void ($('state').textContent = 'нужен provider-url')
+      store('nr-local.provider', provider); store('nr-local.key', $('pkey').value); store('nr-local.skillbox-key', $('skey').value); store('nr-local.profile', $('profile').value)
+      const skey = $('skey').value.trim()
+      chat.configure({
+        localOptions: { profiles, defaultModel: q.get('model') ?? 'glm-5.3-flash', ...(skey && q.get('skillbox') ? { skillbox: { url: q.get('skillbox'), key: skey } } : {}) },
+      })
+      chat.setAttribute('local-module', '/local-backend/browser.js')
+      chat.setAttribute('provider-url', provider)
+      if ($('pkey').value) chat.setAttribute('provider-key', $('pkey').value)
+      chat.setAttribute('profile', $('profile').value)
+      chat.setAttribute('session', session ?? store('nr-local.session') ?? 'auto')
+      chat.setAttribute('backend', 'local')
+    }
+
+    chat.addEventListener('session', (e) => { store('nr-local.session', e.detail.id); $('state').textContent = `сессия ${e.detail.id}`; void refresh() })
+    chat.addEventListener('run-end', () => void refresh())
+    chat.addEventListener('error', (e) => { $('state').textContent = e.detail.message })
+    $('connect').onclick = () => connect()
+    $('fresh').onclick = () => { store('nr-local.session', 'auto'); connect('auto') }
+
+    const fsOf = () => chat.localBackend?.host?.fs
+    async function walk(fs, dir) {
+      const out = []
+      for (const e of (await fs.readdir(dir)).value ?? []) {
+        const p = `${dir}/${e.name}`
+        if (e.type === 'dir') out.push(...(await walk(fs, p)))
+        else out.push(p)
+      }
+      return out
+    }
+    async function refresh() {
+      const fs = fsOf()
+      if (!fs) return
+      const files = await walk(fs, '/project')
+      $('files').textContent = files.map((f) => f.slice('/project/'.length)).join('\n') || '(пусто)'
+    }
+
+    // ZIP без сжатия (stored) — без библиотек.
+    const crcTable = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0 })
+    const crc32 = (b) => { let c = 0xffffffff; for (const x of b) c = crcTable[(c ^ x) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0 }
+    function zip(files) {
+      const enc = new TextEncoder(), parts = [], central = []
+      let offset = 0
+      for (const [name, data] of files) {
+        const n = enc.encode(name), crc = crc32(data)
+        const h = new DataView(new ArrayBuffer(30))
+        h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, n.length, true)
+        parts.push(new Uint8Array(h.buffer), n, data)
+        const c = new DataView(new ArrayBuffer(46))
+        c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true); c.setUint16(28, n.length, true); c.setUint32(42, offset, true)
+        central.push(new Uint8Array(c.buffer), n)
+        offset += 30 + n.length + data.length
+      }
+      const size = central.reduce((s, p) => s + p.length, 0)
+      const end = new DataView(new ArrayBuffer(22))
+      end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, size, true); end.setUint32(16, offset, true)
+      return new Blob([...parts, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' })
+    }
+    function download(blob, name) {
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob); a.download = name; a.click()
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000)
+    }
+    $('zip').onclick = async () => {
+      const fs = fsOf()
+      if (!fs) return
+      const files = []
+      for (const p of await walk(fs, '/project')) files.push([p.slice('/project/'.length), (await fs.readBytes(p)).value])
+      download(zip(files), 'project.zip')
+    }
+    $('mds').onclick = async () => {
+      const fs = fsOf(), sid = chat.sessionId
+      if (!fs || !sid) return
+      const name = (await fs.readdir('/sessions')).value?.find((e) => e.name.endsWith(`_${sid}.mds`))?.name
+      if (name) download(new Blob([(await fs.readBytes(`/sessions/${name}`)).value], { type: 'text/markdown' }), name)
+    }
+    $('reset').onclick = async () => {
+      try { const root = await navigator.storage.getDirectory(); for await (const [n] of root.entries()) await root.removeEntry(n, { recursive: true }) } catch {}
+      indexedDB.deleteDatabase('nr-backend')
+      store('nr-local.session', 'auto')
+      location.reload()
+    }
+
+    if ($('purl').value) connect()
+  </script>
+</body>
+</html>

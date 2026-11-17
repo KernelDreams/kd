@@ -1,0 +1,15 @@
+$title: след блокнота
+$provider: mock
+$mock_reply: ок
+
+## $step one
+$nr-icon: 🔍
+$nr-title: Разбор
+```ts
+export default async (ctx, meta, helpers) => ({ output: await helpers.llm([{ role: 'user', content: 'x' }], { model: 'mock/a' }) })
+```
+
+## $step two
+```ts
+export default async () => ({ output: 'два' })
+```

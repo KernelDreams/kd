@@ -1,0 +1,134 @@
+/*
+ * Tailwind-мост ядра (core-boundary-spec §3): токены скина → утилиты `*-nr-*`
+ * и свои `@utility`. Один файл на ядро и внешние плагины — плагин собирает
+ * Tailwind сам (`@import "tailwindcss/utilities.css"` + этот мост), и его
+ * классы ссылаются на те же `var(--nr-*)`, что и классы ядра.
+ */
+
+/*
+ * Мост токен → Tailwind. `inline` обязателен: утилита должна ссылаться на
+ * `var(--nr-*)` в момент отрисовки, иначе смена скина в рантайме не доедет до
+ * уже сгенерированных классов.
+ */
+@theme inline {
+  /*
+   * Базовая единица стандартной шкалы Tailwind (`p-2`, `gap-3`, …) — тоже
+   * через плотность скина (ui-kit-spec §2): иначе `--nr-density` двигала бы
+   * только `nr-*`, меньшую половину отступов.
+   */
+  --spacing: calc(0.25rem * var(--nr-density) * var(--nr-density-mul, 1));
+
+  --color-nr-bg: var(--nr-bg);
+  --color-nr-surface: var(--nr-surface);
+  --color-nr-raised: var(--nr-raised);
+  --color-nr-fg: var(--nr-fg);
+  --color-nr-muted: var(--nr-muted);
+  --color-nr-line: var(--nr-line);
+  --color-nr-line-soft: var(--nr-line-soft);
+  --color-nr-rule: var(--nr-rule);
+  --color-nr-accent: var(--nr-accent);
+  --color-nr-accent-fg: var(--nr-accent-fg);
+  --color-nr-ok: var(--nr-ok);
+  --color-nr-error: var(--nr-error);
+
+  --font-ui: var(--nr-font-ui);
+  --font-body: var(--nr-font-body);
+  --font-mono: var(--nr-font-mono);
+
+  --radius-nr: var(--nr-radius);
+  --radius-nr-lg: var(--nr-radius-lg);
+
+  --shadow-pop: var(--nr-shadow-pop);
+
+  /* Шкала текста (ui-kit-spec §2): `text-nr-xs … text-nr-body`. */
+  --text-nr-xs: var(--nr-text-xs);
+  --text-nr-sm: var(--nr-text-sm);
+  --text-nr-md: var(--nr-text-md);
+  --text-nr-lg: var(--nr-text-lg);
+  --text-nr-body: var(--nr-text-body);
+
+  --leading-nr-tight: var(--nr-leading-tight);
+  --leading-nr-ui: var(--nr-leading-ui);
+  --leading-nr-body: var(--nr-leading-body);
+
+  /*
+   * Шкала пространства: `p-nr-3`, `gap-nr-4`, … Плотность скина умножается
+   * здесь — компонент про `--nr-density` не знает.
+   */
+  --spacing-nr-1: calc(var(--nr-space-1) * var(--nr-density) * var(--nr-density-mul, 1));
+  --spacing-nr-2: calc(var(--nr-space-2) * var(--nr-density) * var(--nr-density-mul, 1));
+  --spacing-nr-3: calc(var(--nr-space-3) * var(--nr-density) * var(--nr-density-mul, 1));
+  --spacing-nr-4: calc(var(--nr-space-4) * var(--nr-density) * var(--nr-density-mul, 1));
+  --spacing-nr-5: calc(var(--nr-space-5) * var(--nr-density) * var(--nr-density-mul, 1));
+  --spacing-nr-6: calc(var(--nr-space-6) * var(--nr-density) * var(--nr-density-mul, 1));
+  --spacing-nr-rail: calc(var(--nr-rail) * var(--nr-density-mul, 1));
+  --spacing-nr-icon: var(--nr-icon);
+  --spacing-nr-icon-sm: var(--nr-icon-sm);
+  --spacing-nr-hit: var(--nr-hit);
+}
+
+/* Слои (ui-kit-spec §2): `z-nr-dock … z-nr-tooltip` вместо чисел наугад. */
+@utility z-nr-dock {
+  z-index: var(--nr-z-dock);
+}
+@utility z-nr-overlay {
+  z-index: var(--nr-z-overlay);
+}
+@utility z-nr-popover {
+  z-index: var(--nr-z-popover);
+}
+@utility z-nr-modal {
+  z-index: var(--nr-z-modal);
+}
+@utility z-nr-toast {
+  z-index: var(--nr-z-toast);
+}
+@utility z-nr-tooltip {
+  z-index: var(--nr-z-tooltip);
+}
+
+/* Мера строки (ui-kit-spec §3): ширина колонки текста — ручка скина. */
+@utility max-w-nr-measure {
+  max-width: var(--nr-measure);
+}
+
+/* Длительности переходов: `duration-nr-fast`, `duration-nr`. */
+@utility duration-nr-fast {
+  transition-duration: var(--nr-dur-fast);
+}
+@utility duration-nr {
+  transition-duration: var(--nr-dur);
+}
+
+@utility nr-mono {
+  font-family: var(--nr-font-mono);
+  font-variant-ligatures: none;
+}
+
+/*
+ * Гнездо иконки плагина (ui-kit-spec §5.2): плагин отдаёт lucide-компонент или
+ * svg на `currentColor`, размер и толщину линии задаёт ядро — токеном, а не
+ * каждый плагин своим числом. CSS перекрывает атрибуты `width`/`stroke-width`.
+ */
+@utility nr-icon-slot {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  & > svg {
+    width: var(--nr-icon);
+    height: var(--nr-icon);
+    stroke-width: 1.75;
+  }
+}
+
+/* Ленточка-метка секции сайдбара — повторяется в трёх местах. */
+@utility nr-eyebrow {
+  font-family: var(--nr-font-mono);
+  font-size: var(--nr-text-xs);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--nr-muted);
+}

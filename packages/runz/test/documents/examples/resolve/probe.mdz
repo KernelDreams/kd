@@ -1,0 +1,15 @@
+$run: trace
+$who: мир
+
+## $source a
+$nr: {type: 'inline', parse: 'mdd'}
+
+@text: привет ${who}
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  const v = ctx.get(['a', 'text'])
+  return { output: JSON.stringify(v) }
+}
+```

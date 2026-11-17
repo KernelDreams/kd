@@ -1,0 +1,1188 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "BFL API",
+    "version": "0.0.1"
+  },
+  "paths": {
+    "/v1/flux-3-image": {
+      "post": {
+        "operationId": "flux_3_image_v1_flux_3_image_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Flux3ImageInputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Generate an image with FLUX 3."
+      }
+    },
+    "/v1/flux-2-pro": {
+      "post": {
+        "operationId": "generate_flux_2_pro_v1_flux_2_pro_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Flux2Inputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AsyncResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AsyncWebhookResponse"
+                    }
+                  ],
+                  "title": "Response Generate Flux 2 Pro V1 Flux 2 Pro Post"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Generate or edit an image with FLUX.2 [pro]"
+      }
+    },
+    "/v1/flux-pro-1.1": {
+      "post": {
+        "operationId": "flux_pro_1_1_v1_flux_pro_1_1_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FluxPro11Inputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AsyncResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AsyncWebhookResponse"
+                    }
+                  ],
+                  "title": "Response Flux Pro 1 1 V1 Flux Pro 1 1 Post"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Generate an image with FLUX1.1 [pro]"
+      }
+    },
+    "/v1/flux-tools/erase-v1": {
+      "post": {
+        "operationId": "generate_flux_tools_erase_v1_v1_flux_tools_erase_v1_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Flux2EraseInputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AsyncResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AsyncWebhookResponse"
+                    }
+                  ],
+                  "title": "Response Generate Flux Tools Erase V1 V1 Flux Tools Erase V1 Post"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Erase an object from an image"
+      }
+    },
+    "/v1/delete_finetune": {
+      "post": {
+        "summary": "Delete Finetune",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "prompt": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/flux-3-video": {
+      "post": {
+        "tags": [
+          "Models"
+        ],
+        "summary": "Generate a video with FLUX 3.",
+        "description": "Submits a video generation task to FLUX 3 via the harness. The mode is explicit: t2v (`text-to-video`), i2v (`image-continuation`, keyframes), v2v (`video-continuation`, start_video), or draft_enhance (`draft-enhance`, full-quality render of a prior draft's `draft_cache`); the spelled-out aliases are accepted anywhere the short key is.",
+        "operationId": "flux_3_video_v1_flux_3_video_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Flux3VideoInputsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AsyncResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AsyncWebhookResponse"
+                    }
+                  ],
+                  "title": "Response Flux 3 Video V1 Flux 3 Video Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AsyncResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "polling_url": {
+            "type": "string",
+            "title": "Polling Url"
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost",
+            "description": "Cost in credits for this request"
+          },
+          "input_mp": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Mp",
+            "description": "Input megapixels (2 decimal places)"
+          },
+          "output_mp": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Mp",
+            "description": "Output megapixels (2 decimal places)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "polling_url"
+        ],
+        "title": "AsyncResponse"
+      },
+      "AsyncWebhookResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "webhook_url": {
+            "type": "string",
+            "title": "Webhook Url"
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost",
+            "description": "Cost in credits for this request"
+          },
+          "input_mp": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Mp",
+            "description": "Input megapixels (2 decimal places)"
+          },
+          "output_mp": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Mp",
+            "description": "Output megapixels (2 decimal places)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "webhook_url"
+        ],
+        "title": "AsyncWebhookResponse"
+      },
+      "Flux2EraseInputs": {
+        "properties": {
+          "user": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User",
+            "description": "Opaque identifier for the end user supplied by the calling platform."
+          },
+          "image": {
+            "type": "string",
+            "title": "Image",
+            "description": "Base64-encoded input image or HTTP(S) image URL."
+          },
+          "mask": {
+            "type": "string",
+            "title": "Mask",
+            "description": "Base64-encoded black/white mask or HTTP(S) image URL. White pixels indicate the object to remove; black pixels are preserved. Must have the same dimensions as the input image."
+          },
+          "dilate_pixels": {
+            "type": "integer",
+            "maximum": 25,
+            "minimum": 0,
+            "title": "Dilate Pixels",
+            "description": "Number of pixels to dilate the mask by before removal. Dilation helps cover object edges. Maximum is 25 pixels.",
+            "default": 10
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Optional seed for reproducibility.",
+            "example": 42
+          },
+          "safety_tolerance": {
+            "type": "integer",
+            "maximum": 5,
+            "minimum": 0,
+            "title": "Safety Tolerance",
+            "description": "Tolerance level for input and output moderation. Between 0 and 5, 0 being most strict, 5 being least strict.",
+            "default": 2,
+            "example": 2
+          },
+          "output_format": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OutputFormat"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "png"
+          },
+          "webhook_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Webhook Url",
+            "description": "URL to receive webhook notifications"
+          },
+          "webhook_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Webhook Secret",
+            "description": "Optional secret for webhook signature verification"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image",
+          "mask"
+        ],
+        "title": "Flux2EraseInputs",
+        "description": "Input model for public FLUX.2 erase."
+      },
+      "Flux2Inputs": {
+        "properties": {
+          "user": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User",
+            "description": "Opaque identifier for the end user supplied by the calling platform."
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text prompt for image generation.",
+            "example": "ein fantastisches bild"
+          },
+          "disable_pup": {
+            "type": "boolean",
+            "title": "Disable Pup",
+            "description": "Disable automatic prompt upsampling for this request. FLUX.2 [pro] and [max] apply prompt upsampling by default; set this to true to generate from your prompt exactly as written.",
+            "default": false
+          },
+          "input_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Image",
+            "description": "Path to the input image."
+          },
+          "input_image_2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Image 2",
+            "description": "Path to the second input image."
+          },
+          "input_image_3": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Image 3",
+            "description": "Path to the third input image."
+          },
+          "input_image_4": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Image 4",
+            "description": "Path to the fourth input image."
+          },
+          "input_image_5": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Image 5",
+            "description": "Path to the fifth input image."
+          },
+          "input_image_6": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Image 6",
+            "description": "Path to the sixth input image."
+          },
+          "input_image_7": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Image 7",
+            "description": "Path to the seventh input image."
+          },
+          "input_image_8": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Image 8",
+            "description": "Path to the eighth input image."
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Optional seed for reproducibility.",
+            "example": 42
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "Width of the image",
+            "default": 0
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "Height of the image",
+            "default": 0
+          },
+          "safety_tolerance": {
+            "type": "integer",
+            "maximum": 5,
+            "minimum": 0,
+            "title": "Safety Tolerance",
+            "description": "Tolerance level for input and output moderation. Between 0 and 5, 0 being most strict, 5 being least strict. If you wish to increase the safety_tolerance beyond these levels please reach out to the team.",
+            "default": 2
+          },
+          "output_format": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OutputFormat"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "jpeg"
+          },
+          "webhook_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Webhook Url",
+            "description": "URL to receive webhook notifications"
+          },
+          "webhook_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Webhook Secret",
+            "description": "Optional secret for webhook signature verification"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "Flux2Inputs"
+      },
+      "Flux3ImageInputs": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Free-form prompt describing the image."
+          },
+          "images": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Images",
+            "description": "Optional reference image(s) the prompt edits or draws from; each is an http(s) URL or base64, one to 10 total."
+          },
+          "aspect_ratio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "21:9",
+                  "2:1",
+                  "16:9",
+                  "3:2",
+                  "7:5",
+                  "4:3",
+                  "5:4",
+                  "1:1",
+                  "4:5",
+                  "3:4",
+                  "5:7",
+                  "2:3",
+                  "9:16",
+                  "1:2",
+                  "9:21"
+                ]
+              },
+              {
+                "type": "string",
+                "const": "auto"
+              }
+            ],
+            "title": "Aspect Ratio",
+            "description": "Output aspect ratio. Under `auto` a ratio the prompt asks for wins, otherwise the output keeps the first reference image's framing; without references the prompt decides, else 1:1.",
+            "default": "auto"
+          },
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "768sq",
+              "1k",
+              "1.5k",
+              "2k",
+              "4k"
+            ],
+            "title": "Resolution",
+            "description": "Image resolution class, an equal-pixel-area tier: `768sq`, `1k`, `1.5k`, `2k`, or `4k`. Exact dimensions vary with the aspect ratio.",
+            "default": "1k"
+          },
+          "safety_tolerance": {
+            "type": "integer",
+            "maximum": 4,
+            "minimum": 0,
+            "title": "Safety Tolerance",
+            "description": "Tolerance level for input and output harm moderation. Between 0 and 4, with 0 the strictest.",
+            "default": 2
+          },
+          "grounding": {
+            "type": "boolean",
+            "title": "Grounding",
+            "description": "When true (default) the prompt may be grounded in external research: web search and image search. When false, both are off.",
+            "default": true
+          },
+          "version": {
+            "type": "string",
+            "const": "latest",
+            "title": "Version",
+            "description": "Endpoint version. `latest` (default) serves the current release; dated pinnable release tags are added here as they are published.",
+            "default": "latest"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "Flux3ImageInputs"
+      },
+      "FluxPro11Inputs": {
+        "properties": {
+          "user": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User",
+            "description": "Opaque identifier for the end user supplied by the calling platform."
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt",
+            "description": "Text prompt for image generation.",
+            "default": "",
+            "example": "ein fantastisches bild"
+          },
+          "image_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Prompt",
+            "description": "Optional base64 encoded image to use with Flux Redux."
+          },
+          "width": {
+            "type": "integer",
+            "multipleOf": 32,
+            "maximum": 1440,
+            "minimum": 256,
+            "title": "Width",
+            "description": "Width of the generated image in pixels. Must be a multiple of 32.",
+            "default": 1024
+          },
+          "height": {
+            "type": "integer",
+            "multipleOf": 32,
+            "maximum": 1440,
+            "minimum": 256,
+            "title": "Height",
+            "description": "Height of the generated image in pixels. Must be a multiple of 32.",
+            "default": 768
+          },
+          "prompt_upsampling": {
+            "type": "boolean",
+            "title": "Prompt Upsampling",
+            "description": "Whether to perform upsampling on the prompt. If active, automatically modifies the prompt for more creative generation.",
+            "default": false
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Optional seed for reproducibility.",
+            "example": 42
+          },
+          "safety_tolerance": {
+            "type": "integer",
+            "maximum": 6,
+            "minimum": 0,
+            "title": "Safety Tolerance",
+            "description": "Tolerance level for input and output moderation. Between 0 and 6, 0 being most strict, 6 being least strict.",
+            "default": 2,
+            "example": 2
+          },
+          "output_format": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OutputFormat"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Output format for the generated image. Can be 'jpeg', 'png', or 'webp'.",
+            "default": "jpeg"
+          },
+          "webhook_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Webhook Url",
+            "description": "URL to receive webhook notifications"
+          },
+          "webhook_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Webhook Secret",
+            "description": "Optional secret for webhook signature verification"
+          }
+        },
+        "type": "object",
+        "title": "FluxPro11Inputs"
+      },
+      "OutputFormat": {
+        "type": "string",
+        "enum": [
+          "jpeg",
+          "png",
+          "webp"
+        ],
+        "title": "OutputFormat"
+      },
+      "Flux3VideoInputsBody": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Flux3VideoT2VInputs"
+          },
+          {
+            "$ref": "#/components/schemas/Flux3VideoI2VInputs"
+          }
+        ],
+        "title": "Flux3VideoInputsBody",
+        "description": "Route body wrapper: FastAPI drops the union's discriminator when the\nbare union is the top-level body param, so 422s enumerate every mode\nclass instead of the one the client sent. The RootModel keeps\ndiscrimination inside pydantic; routes unwrap `.root`.",
+        "discriminator": {
+          "propertyName": "mode",
+          "mapping": {
+            "i2v": "#/components/schemas/Flux3VideoI2VInputs",
+            "t2v": "#/components/schemas/Flux3VideoT2VInputs"
+          }
+        }
+      },
+      "Flux3VideoT2VInputs": {
+        "properties": {
+          "user": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User",
+            "description": "Opaque identifier for the end user supplied by the calling platform."
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Free-form prompt describing the video."
+          },
+          "aspect_ratio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "21:9",
+                  "2:1",
+                  "16:9",
+                  "4:3",
+                  "1:1",
+                  "3:4",
+                  "9:16",
+                  "9:21"
+                ]
+              },
+              {
+                "type": "string",
+                "const": "auto"
+              }
+            ],
+            "title": "Aspect Ratio",
+            "description": "Output aspect ratio. `auto` lets the harness choose from the prompt and any references.",
+            "default": "auto"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 20.0,
+                "minimum": 5.0
+              },
+              {
+                "type": "string",
+                "const": "auto"
+              }
+            ],
+            "title": "Duration",
+            "description": "Video duration in seconds (any whole second from 5 to 20), or `auto` to fit the content.",
+            "default": "auto"
+          },
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "hd",
+              "fhd",
+              "qhd",
+              "uhd"
+            ],
+            "title": "Resolution",
+            "description": "Video resolution class: `hd`, or `fhd`/`qhd`/`uhd` for a higher-resolution result finished by the video upsampler. Exact dimensions vary with the aspect ratio.",
+            "default": "hd"
+          },
+          "version": {
+            "type": "string",
+            "const": "latest",
+            "title": "Version",
+            "description": "Endpoint version. `latest` (default) serves the current release; dated pinnable release tags are added here as they are published.",
+            "default": "latest"
+          },
+          "generate_audio": {
+            "type": "boolean",
+            "title": "Generate Audio",
+            "description": "Generate synchronized audio alongside the video.",
+            "default": true
+          },
+          "safety_tolerance": {
+            "type": "integer",
+            "maximum": 4.0,
+            "minimum": 0.0,
+            "title": "Safety Tolerance",
+            "description": "Tolerance level for input and output harm moderation. Between 0 and 4, with 0 the strictest. Sexual content is limited to level 3 and hate content to level 2 regardless of the requested tolerance. Contextual safety signals can tighten the requested level.",
+            "default": 2
+          },
+          "draft": {
+            "type": "boolean",
+            "title": "Draft",
+            "description": "Draft mode: generate a fast preview and return a `draft_cache` download URL in the result. Download that bundle and pass it back later to render the full-quality version of the same generation.",
+            "default": false
+          },
+          "mode": {
+            "type": "string",
+            "const": "t2v",
+            "title": "Mode"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "prompt",
+          "mode"
+        ],
+        "title": "Text to Video"
+      },
+      "Flux3VideoI2VInputs": {
+        "properties": {
+          "user": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User",
+            "description": "Opaque identifier for the end user supplied by the calling platform."
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Free-form prompt describing the video."
+          },
+          "aspect_ratio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "21:9",
+                  "2:1",
+                  "16:9",
+                  "4:3",
+                  "1:1",
+                  "3:4",
+                  "9:16",
+                  "9:21"
+                ]
+              },
+              {
+                "type": "string",
+                "const": "auto"
+              }
+            ],
+            "title": "Aspect Ratio",
+            "description": "Output aspect ratio. `auto` lets the harness choose from the prompt and any references.",
+            "default": "auto"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 20.0,
+                "minimum": 5.0
+              },
+              {
+                "type": "string",
+                "const": "auto"
+              }
+            ],
+            "title": "Duration",
+            "description": "Video duration in seconds (any whole second from 5 to 20), or `auto` to fit the content.",
+            "default": "auto"
+          },
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "hd",
+              "fhd",
+              "qhd",
+              "uhd"
+            ],
+            "title": "Resolution",
+            "description": "Video resolution class: `hd`, or `fhd`/`qhd`/`uhd` for a higher-resolution result finished by the video upsampler. Exact dimensions vary with the aspect ratio.",
+            "default": "hd"
+          },
+          "version": {
+            "type": "string",
+            "const": "latest",
+            "title": "Version",
+            "description": "Endpoint version. `latest` (default) serves the current release; dated pinnable release tags are added here as they are published.",
+            "default": "latest"
+          },
+          "generate_audio": {
+            "type": "boolean",
+            "title": "Generate Audio",
+            "description": "Generate synchronized audio alongside the video.",
+            "default": true
+          },
+          "safety_tolerance": {
+            "type": "integer",
+            "maximum": 4.0,
+            "minimum": 0.0,
+            "title": "Safety Tolerance",
+            "description": "Tolerance level for input and output harm moderation. Between 0 and 4, with 0 the strictest. Sexual content is limited to level 3 and hate content to level 2 regardless of the requested tolerance. Contextual safety signals can tighten the requested level.",
+            "default": 2
+          },
+          "draft": {
+            "type": "boolean",
+            "title": "Draft",
+            "description": "Draft mode: generate a fast preview and return a `draft_cache` download URL in the result. Download that bundle and pass it back later to render the full-quality version of the same generation.",
+            "default": false
+          },
+          "mode": {
+            "type": "string",
+            "const": "i2v",
+            "title": "Mode"
+          },
+          "keyframes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "type": "array",
+                "maxItems": 2,
+                "minItems": 2
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ],
+                  "type": "array",
+                  "maxItems": 2,
+                  "minItems": 2
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Keyframes",
+            "description": "Your images become frames of the video; each is an http(s) URL or base64, one to ten total. Plain images: one starts the video, two start and end it, with more the first starts it, the last ends it, and the rest fall evenly in between (3 or more need a set `duration`). To control the timing yourself, send `[seconds, image]` pairs in time order, e.g. `[[0, \"...\"], [3.5, \"...\"]]`: each image becomes the frame at that second, and with `duration: \"auto\"` the video runs to the last pair's second, rounded up (20s max)."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "prompt",
+          "mode",
+          "keyframes"
+        ],
+        "title": "Image to Video",
+        "description": "Image continuation: your images become frames of the video. One image\nstarts the video; two start and end it; with more, the first starts it,\nthe last ends it, and the rest fall evenly in between. To control the\ntiming yourself, send `[seconds, image]` pairs: each image becomes the\nframe at that second."
+      }
+    }
+  }
+}

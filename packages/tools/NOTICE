@@ -1,0 +1,25 @@
+@kerneldreams/tools
+Copyright (c) 2026 Denys Vynohradskyi. MIT License (see LICENSE).
+
+This package includes code adapted from the following MIT-licensed projects:
+
+- OpenClaw (src/agents)
+  Copyright (c) OpenClaw Foundation
+  https://github.com/openclaw/openclaw — MIT License
+
+  - src/fs/edit-diff.ts, edit-replacements.ts, file-diff.ts — vendored
+    from src/agents/sessions/tools/ (commit 071246fb, 2026-10-02): fuzzy edit
+    matching with replacement on original offsets, line-ending preservation,
+    diff receipts. Small helpers (line endings, levenshtein, utf16 slice) in
+    src/fs/edit-support.ts.
+  - src/fs/apply-patch.ts — hunk location tiers after
+    src/agents/apply-patch-update.ts (unified diff instead of the Codex format).
+  - src/exec/, src/node/processes.ts — exec/process shape (yieldMs → background
+    → poll/kill) after src/agents/bash-tools*.ts and bash-process-registry.ts.
+
+- pi-mono (packages/coding-agent), Copyright (c) Mario Zechner
+  https://github.com/badlogic/pi-mono — MIT License
+  Ported from pi coding-agent (packages/coding-agent/src/core/tools/, via the
+  pi-nrchat fork): read, ls, find, grep tools (schemas, limits, output format),
+  truncate.ts and path-utils.ts (src/fs/read.ts, search.ts, truncate.ts,
+  paths.ts).

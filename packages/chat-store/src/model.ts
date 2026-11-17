@@ -1,0 +1,668 @@
+/**
+ * @kerneldreams/chat-store — neutral chat-session model (spec §3).
+ *
+ * Message anatomy (Part/Message/SessionInfo/…) moved here from
+ * nr-ui-protocol §2.1–2.3 **as-is**, no semantic edits: this is the shared
+ * reality of storage and wire, and its home is the lower layer. The protocol is
+ * now a client: it imports these types and re-exports them (existing imports
+ * don't break), keeping only the wire for itself (RunEvent, Capabilities,
+ * Envelope, SSE).
+ *
+ * Canon: S:\skills\nr-system.dev\specs\chat-store-spec.md
+ */
+
+import type { SessionKind, TitleSource } from './kind.js'
+
+// ────────────────────────────────────────────────────────────────────────────
+// Session (protocol §2.1)
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface SessionInfo {
+  id: string
+  title?: string
+  createdAt?: string // ISO
+  updatedAt?: string // ISO
+  messageCount?: number
+  // model (protocol v1.1, capability: models)
+  model?: ModelSelection
+  // presentation (capability: catalog)
+  botId?: string
+  botName?: string
+  botAvatar?: string // URL/ref
+  accentColor?: string
+  participants?: Participant[]
+  /**
+   * Файл сессии на носителе стора: абсолютный путь у драйверов,
+   * которые живут файлами (nr-chat), — «копировать путь», экспорт. Справочное:
+   * клиент его не открывает, по нему не адресует; нет — стор не файловый.
+   */
+  file?: string
+  // forking (capability: fork)
+  parentSessionId?: string
+  forkMessageId?: string
+  /**
+   * Рабочее пространство сессии — `WorkspaceInfo.id` (workspace-spec §2).
+   *
+   * Opaque: у pi это cwd, у другого хранилища — что угодно своё. Поле здесь, а
+   * не в протоколе, потому что пространство — свойство хранилища: сессия лежит
+   * в нём, а провод только передаёт id дальше.
+   */
+  workspace?: string
+  /**
+   * Проект сессии (spaces-spec §3, протокол v1.35) — вещь на диске
+   * внутри пространства `workspace`: id из `workspace.repos`. Его корень — cwd
+   * сессии, контекст-пакет — в префиксе после агента. Нет — без проекта.
+   */
+  project?: string
+  /**
+   * Профиль сессии — `ProfileInfo.id` (profiles-spec §3–4).
+   *
+   * Opaque, как и `workspace`: у pi это имя файла `profiles/<name>.mdz`, и
+   * хранится выбор в самой сессии. Поле отсутствует — бэкенд профилей не знает;
+   * у знающего сессия без выбора несёт `'default'`.
+   *
+   * `'inline'` — профиль встроен в сессию документом (bot-as-session-spec §1):
+   * каталога за ним нет, сам документ — в {@link SessionInfo.profileDoc}.
+   */
+  profile?: string
+  /**
+   * Документ встроенного профиля — есть ровно при `profile: 'inline'`
+   * (bot-as-session-spec §1). Сессия несёт своего агента с собой: файл сессии
+   * переносим, каталог окружения ему не нужен.
+   */
+  profileDoc?: ProfileDoc
+  /**
+   * Движок-исполнитель сессии (users-spec §1, протокол v1.29): `nr`, `acp`, `pi`…
+   * Ставит хаб (`createHub`, backend-http) по месту хранения сессии; стор и
+   * одиночный бэкенд поле не пишут. Нет — движок один, сам бэкенд.
+   */
+  engine?: string
+  /** Движок сессии сейчас недоступен (хаб не достучался): сессия в списке, операции — нет. */
+  engineUnavailable?: boolean
+  /**
+   * Автор сессии (users-spec §4, протокол v1.30): id пользователя стенда. Пишет
+   * хаб на create — в мету сессии (`sessionMeta.owner`); нет — сессия владельца
+   * стенда (старые сессии, стенд без пользователей).
+   */
+  owner?: string
+  /**
+   * Закреплена: в списках сайдбара и страницы пространства — блоком «Закреплённые»
+   * сверху. Флаг в мете сессии (`sessionMeta.pinned`) — виден со всех клиентов; порядок
+   * списка не трогает. Нет — не закреплена.
+   */
+  pinned?: boolean
+  /** Кому сессия открыта, кроме автора (users-spec §4): нет — приватна. */
+  shared?: SessionShare
+  /**
+   * Идущий ран (run-resume-spec §1, протокол v1.31): есть — у сессии сейчас
+   * ход, к нему можно подключиться (`sessions.attach`). Ставит транспорт
+   * (`withRunAttach` backend-http), стор поле не пишет.
+   */
+  run?: SessionRun
+  /**
+   * Задача сессии (task-session-spec §8, протокол v1.36): исполнитель или
+   * приёмщик задачи Projektor. Пишет хост задач в мету (`sessionMeta.task`); нет —
+   * обычная сессия.
+   */
+  task?: SessionTask
+  /**
+   * Движок держит процесс агента сессии (протокол v1.38): ACP-сессия поднята
+   * и висит без хода. `idleSince` — с какого момента без хода. Ставит движок в
+   * `sessions.live`, стор поле не пишет; нет — процесса нет (следующий ход поднимет из ленты).
+   */
+  process?: { idleSince?: string }
+  /**
+   * Счётчики сессии (протокол v1.53, objects-spec §3.3, монитор T4): токены in/out/кэш, контекст,
+   * стоимость — `{name, value, unit?, max?, at?}`. Отдаёт движок в `sessions.live`; стор не пишет.
+   */
+  metrics?: Array<{ name: string; value: number; unit?: string; max?: number; at?: number }>
+  /**
+   * Вид чата (протокол v1.44): `talk` — разговор с человеком (и миты),
+   * `run`/`review` — исполнитель/приёмщик задачи, `probe` — пробы и тесты, `rp` —
+   * ролевая игра, `auto` — автопрогон без человека. Явный `sessionMeta.kind`, иначе
+   * вывод по задаче/заголовку/пространству/профилю (`sessionKindOf`). Пишет стор.
+   */
+  kind?: SessionKind
+  /**
+   * Откуда имя (v1.44): `user` — переименовал человек, `create` — дано при
+   * создании, `agent` — от агента, `auto` — автоимя (40 символов, карточка). `user`
+   * и `create` автоматика не переписывает. Нет — имени нет.
+   */
+  titleSource?: TitleSource
+  /** Сессия не уходит в облачную разметку (карточки, сводки) — `sessionMeta.noCloud` (v1.44). */
+  noCloud?: boolean
+  /**
+   * Аккаунт Claude Code, на котором идёт сессия (v1.48): id из таблицы
+   * аккаунтов стенда (`alice`, `dana`, `erin`) — по `claudeAccount` пространства.
+   * Нет — бэкенд аккаунтов не знает.
+   */
+  account?: string
+  /**
+   * В архиве (v1.55, session-archive-spec §1): дата ISO — с какого момента; `false` —
+   * вернули руками (автоархив её больше не трогает). Флаг `sessionMeta.archived`, файл не
+   * двигается. Архивные `sessions.list` по умолчанию не отдаёт (`SessionListOpts.archived`).
+   */
+  archived?: string | false
+  /** Кто убрал в архив (v1.55): `auto` — автоархив служебных сессий закрытой задачи; нет — человек. */
+  archivedBy?: 'auto'
+  /** Теги (v1.55): короткие строки в нижнем регистре, без `#` — `sessionMeta.tags`. */
+  tags?: string[]
+  /**
+   * Своя иконка чата (v1.63, icons-spec §4.1) — `sessionMeta.icon`: строка как у `$icon` типа (имя
+   * lucide, эмодзи, адрес картинки или путь `file:` хоста). Нет — лицо по цепочке персона → агент → буква.
+   */
+  icon?: string
+}
+
+/** Сессия задачи (v1.36): какая задача, чья роль, из какого ствола запущена. */
+export interface SessionTask {
+  /** Ref задачи Projektor: ``. */
+  issue: string
+  role: 'executor' | 'acceptor'
+  /** Сессия ствола, из которой задача запущена; нет — запуск из терминала. */
+  parent?: string
+}
+
+/** Идущий ран сессии (v1.31). */
+export interface SessionRun {
+  id: string
+  /** ISO — когда ран начался. */
+  startedAt: string
+  /** Ран ждёт ответа человека (`ask` без ответа). */
+  waiting?: 'ask'
+  /**
+   * Последнее событие рана (v1.38): `tool` — идёт тул `name`, `result` — тул
+   * `name` вернул результат, `text` — пишет ответ, `thinking` — думает, `ask` — спросил
+   * человека (`name` — вид ask), `activity` — статус рана (`name` — его kind).
+   * `at` — ISO, с какого момента так («тул Bash 3 мин» в виде «Запущенные сессии»).
+   */
+  last?: { kind: 'tool' | 'result' | 'text' | 'thinking' | 'ask' | 'activity'; name?: string; at: string }
+}
+
+/**
+ * «Поделиться» сессией (users-spec §4): участникам проекта целиком (`project`)
+ * и/или списку пользователей; `write` — могут слать ходы, иначе только читают.
+ */
+export interface SessionShare {
+  project?: boolean
+  users?: string[]
+  write?: boolean
+}
+
+/**
+ * Документ профиля (profile-editor-spec §2): всё, что конструктор агентов
+ * читает и пишет. В отличие от витрины `ProfileInfo` протокола — не витрина, а
+ * источник: `profiles.save` принимает его целиком и возвращает то, что легло на
+ * диск.
+ *
+ * Живёт здесь, а не в протоколе, с тех пор как сессия умеет нести профиль в
+ * себе (`SessionInfo.profileDoc`): анатомия сессии — дом нижнего слоя, протокол
+ * ре-экспортирует тип под тем же именем.
+ *
+ * Источник правды каталожного профиля — файл профиля бэкенда (у pi —
+ * `profiles/<id>.mdz`); встроенного — запись в самой сессии.
+ */
+/**
+ * Распознавание 🎤 для сессий агента (`voice` в `%meta`, LLM-12). Нарративным
+ * агентам (storywriter, RP) вводные слова и паузы несут смысл — им `verbatim`
+ * и пакет всегда. Нет поля — глобальная настройка клиента.
+ */
+export interface AgentVoice {
+  /** `smart` — чистовой текст (без слов-паразитов), `verbatim` — дословно. */
+  mode?: 'smart' | 'verbatim'
+  /** Уточнение пакетом по всему звуку: `always` — всегда подменяет live, `auto` — когда live сломан, `off` — без пакета. */
+  refine?: 'auto' | 'always' | 'off'
+  /** Эмоции в диктовке: маркеры моделью с аудиовходом поверх текста распознавания; нет поля — выкл. */
+  emotions?: 'off' | 'emoji' | 'tags'
+  /** Голос озвучки (id каталога speak): перебивает настройку устройства, голос персоны — его. */
+  say?: string
+}
+
+export interface ProfileDoc {
+  /** Имя файла без расширения; `[a-z0-9-]`. Меняется только через `duplicate`. У встроенного — `'inline'`. */
+  id: string
+  /** Отображаемое имя; пустое — бэкенд показывает `id`. */
+  name: string
+  description?: string
+  /** `ModelInfo.id`; нет — модель окружения. */
+  model?: string
+  /** Уровень рассуждения (`ModelInfo.thinking`); нет — как у окружения. */
+  thinking?: string
+  /** `'all'` — все; `'none'` — без тулов; список — только эти; нет — как у окружения. */
+  tools?: 'all' | 'none' | string[]
+  /** id из `catalogs.skills` или абсолютный путь. */
+  skills?: string[]
+  /** id из `catalogs.extensions` или путь — дополнительно к окружению. */
+  extensions?: string[]
+  /** System prompt профиля — ЗАМЕНА штатного промпта процесса. */
+  systemPrompt?: string
+  /**
+   * Промпт агента (session-document-spec §3): `pre`/`post` — данные агента
+   * (`agent.pre`/`agent.post` шаблона), читаются живьём на каждом ране; в мету
+   * сессии на nr не копируются. `mode` — устарел: сборка nr его игнорирует
+   * (backend-pi ещё копирует `$prompt` в мету при создании — pi без изменений).
+   */
+  prompt?: { mode?: 'append' | 'replace'; pre?: string; post?: string }
+  /**
+   * `$template` (session-document-spec §3): шаблон `.mds` агента — путь от
+   * каталога профилей; нет — встроенный `agent.mds`. Текст шаблона (начинается
+   * с `%`) — шаблон inline-агента. Профиль из файла может нести его и в `extra.template`.
+   */
+  template?: string
+  /**
+   * Движок по умолчанию (agents-spec §1): id движка хаба, на котором агент
+   * крутится, если при создании сессии не выбрали другой. Нет — `$engine`
+   * проекта, затем дефолт хаба.
+   */
+  engine?: string
+  /** Карточка агента (`card` в `%meta`, memory-spec): путь или имя. */
+  card?: string
+  /**
+   * Лицо агента (v1.63, icons-spec §4.1): `icon` в `%meta` — строка как `$icon` типа (lucide, эмодзи,
+   * картинка), `avatar` — картинка (путь или адрес). Лицо чата без своей иконки и персоны — отсюда.
+   */
+  icon?: string
+  avatar?: string
+  /** Распознавание речи в сессиях агента (`voice` в `%meta`, LLM-12); нет — глобальная настройка клиента. */
+  voice?: AgentVoice
+  /**
+   * Откуда документ (agents-spec §2), только чтение: `agents` — `agents/*.mds`,
+   * `legacy` — старые `profiles/`. Сохранение всегда пишет в `agents/`.
+   */
+  source?: 'agents' | 'legacy'
+  /** `$builder` (§4.2): имя билдера промпта; нет — `mds-template`. */
+  builder?: string
+  /**
+   * Шаблон impersonate («ответь за меня», RP): блок `## $impersonate` профиля.
+   * Макросы `{{user}}`, `{{char}}`, `{{input}}`, `{{persona}}`, `{{scenario}}`,
+   * `{{persona_system}}`, `{{persona_post}}`; нет — дефолт клиента.
+   */
+  impersonate?: string
+  /**
+   * Прочие атрибуты файла как есть (текстом). UI показывает их «дополнительно»
+   * и не трогает; `save` сохраняет их, даже если клиент прислал доку без `extra`.
+   */
+  extra?: Record<string, string>
+}
+
+/**
+ * The model + reasoning level chosen for a session (protocol v1.1 §2).
+ *
+ * The protocol calls this type `SessionModel` and re-exports it under that
+ * name; here it is `ModelSelection` because `SessionModel` in this package is
+ * already taken by the stored session (info + nodes) — a different thing
+ * entirely. Same shape on both sides, so the wire type and this one are
+ * interchangeable.
+ *
+ * `model` is opaque: the backend knows what its ids mean, storage doesn't.
+ */
+export interface ModelSelection {
+  /** `ModelInfo.id` of the backend that owns the session. */
+  model: string
+  /** One of that model's `thinking` levels; absent = no reasoning level set. */
+  thinking?: string
+}
+
+/** Роль персоны: `user` — я в этом чате, `char` — собеседник (их может быть несколько). */
+export type PersonaKind = 'user' | 'char'
+
+/**
+ * Персона — кто говорит (personas-spec §1), а не «карточка персонажа». Живёт в
+ * сессии, как мета и профиль: сессия самодостаточна. Дом — здесь:
+ * общая сборка (`assembly`) читает персоны, протокол ре-экспортирует тип.
+ */
+export interface Persona {
+  /** Уникален внутри сессии. */
+  id: string
+  kind: PersonaKind
+  /** Имя, которое видит модель и человек. */
+  name: string
+  /** ref вложения сессии или путь; как показать — решает UI. */
+  avatar?: string
+  /** `ModelInfo.id` — персона может говорить своей моделью (мультиактёрность). */
+  model?: string
+  /** Персональная инструкция: инжектится, когда ход этой персоны. */
+  prompt?: string
+  color?: string
+  /**
+   * Грамматический пол (v1.13): `female` | `male`; нет — не задан. Для
+   * согласования в промптах бэкенда (рус. «ты вошёл/вошла»); UI не трактует.
+   */
+  gender?: string
+  /** Голос озвучки реплик персоны (id каталога speak); нет — голос агента или устройства. */
+  voice?: string
+  /**
+   * Карта персонажа (session-document-spec §2.1, v1.22): `data` карточки CCv3
+   * как есть, снапшот на момент импорта. Платформа схему не валидирует —
+   * шаблон агента читает поля как `card.<x>`. `{{char}}`/`{{user}}` в ней не
+   * подставлены: раскрываются на сборке. У user-персоны — её тайные поля
+   * (`scenario`, `system_prompt`, `post_history_instructions`); старые плоские
+   * поля персоны читаются фолбэком.
+   */
+  card?: Record<string, unknown>
+}
+
+/**
+ * Документ персон сессии: `custom`-запись `nr-session-personas`, полный документ
+ * каждый раз (последняя по активной ветке = состояние). Персон нет — `{ personas: [] }`.
+ */
+export interface PersonasDoc {
+  personas: Persona[]
+  /** id `user`-персоны сессии: ею подписаны user-сообщения. */
+  userId?: string
+}
+
+export interface Participant {
+  id: string
+  type: 'human' | 'ai'
+  name: string
+  avatar?: string
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Message (protocol §2.2)
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface MessageFlags {
+  /**
+   * UI axis: user does not see the node, the MODEL does (baked prompts,
+   * injections, presets). Debug lens may reveal. Default true (absent = visible).
+   */
+  visible?: boolean
+  /**
+   * Model axis, part of HISTORY: switched off by a deliberate decision
+   * (user toggle / custom transform). Excluded from the prompt. UI renders dimmed.
+   */
+  disabled?: boolean
+  /**
+   * @deprecated Legacy chat2 flag = disabled (visible in UI, invisible to LLM).
+   * Drivers map hidden→disabled on read and no longer write it.
+   */
+  hidden?: boolean
+  frozen?: boolean // always in context, curation must not touch
+  injected?: boolean // inserted by the system, not shown in the feed
+}
+
+export interface MessageMeta {
+  createdAt?: string
+  model?: string
+  usage?: Usage
+  /**
+   * Who said it (personas-spec §1): `Persona.id` of the session. User messages
+   * carry the session's user persona, assistant ones the persona whose turn it
+   * was. No personas — no field.
+   */
+  personaId?: string
+  /**
+   * Addressee (whisper): `Persona.id` the message was said to privately.
+   * No field — said to everyone present. The feed core does not interpret it.
+   */
+  to?: string
+  /**
+   * Witnesses: `Persona.id`s present when the message was said (who saw/heard
+   * it). Opaque to the feed core; a plugin decides what to do with it.
+   */
+  seen?: string[]
+  /**
+   * Speech unit for TTS (who speaks, which voice, in what tone). Opaque to the
+   * feed core; a voice plugin reads it. See `MessageSpeech`.
+   */
+  speech?: MessageSpeech
+  /**
+   * Greeting index (session-document-spec §2.2, v1.22): on each sibling of the
+   * first assistant node — its index in `[first_mes, ...alternate_greetings]`
+   * of the character card. The prompt builder takes the active sibling's index;
+   * editing the greeting's text does not change it.
+   */
+  greeting?: number
+  /**
+   * Host note into the model context (protocol v1.36, task-session-spec §8): a
+   * `system` message the backend hands to the model with the next turn (task
+   * report into the trunk session). No field — the note stays in the feed only.
+   */
+  context?: boolean
+  /**
+   * User message that joined a running turn (protocol v1.37): written at
+   * the point of the answer where it was poured in. The model sees it as an
+   * ordinary user message; the feed marks it «влито в ход».
+   */
+  steered?: boolean
+  /**
+   * Where the user wrote from: device, place, time zone — the front
+   * sends it with the run, the backend writes it on the user message. The
+   * context stamp (`assembly/stamp`) is built from it and `createdAt`.
+   */
+  client?: { device?: string; place?: string; tz?: string }
+  /**
+   * Lorebook v2 pins (protocol v1.46): `sticky` entries pinned to this
+   * player reply — the assembly places each right after it on every later turn.
+   * `book` — book id, `entry` — entry uid, `variant` — text variant index.
+   */
+  lore?: Array<{ book: string; entry: string; variant?: number }>
+  /** Variants of `once` entries shown on this turn (rotation only). */
+  loreOnce?: Array<{ book: string; entry: string; variant?: number }>
+  /**
+   * CYOA turn options of a bot reply (protocol v1.47, cyoa-spec §2):
+   * intents with an axis; `picked` — the one a sent player reply followed,
+   * `pick` — the one the model would choose, `previous` — earlier re-rolls.
+   */
+  choices?: {
+    choices: Array<{ label: string; intent: string; axis: string; explicit?: boolean }>
+    pick?: number
+    picked?: number
+    previous?: Array<{ label: string; intent: string; axis: string; explicit?: boolean }>
+    model?: string
+  }
+  /** Direction a player reply was written by (v1.47, cyoa-spec §3): intent, axis, one-off tone, length. */
+  direction?: { intent: string; axis?: string; tone?: string[]; length?: 'short' | 'normal' | 'long'; choice?: { messageId: string; index: number } }
+  /** Editor notes of a bot reply for the next turn (v1.47, cyoa-spec §4): 0–2 lines, `[]` — editor ran, nothing to say. */
+  editorNotes?: string[]
+  /** Editor notes fed into this player reply's turn: source reply id and note index. */
+  editorApplied?: Array<{ from: string; i: number }>
+  /** Preset variables for this one run (chip, v1.67, §5): `{language: 'ru'}`. */
+  vars?: Record<string, string>
+  /** Greeting variant made by the greeting processor (v1.70, §6): original index, preset variable values, model, cache key. */
+  generated?: { of: number; vars: Record<string, string>; model?: string; cached?: boolean; key?: string }
+}
+
+/**
+ * How a message is voiced: `speaker` — `Persona.id`, `voice` — provider voice id
+ * (`''` — no designed voice yet, use a default one), `instruct` — delivery/tone
+ * ("angrily", "in a whisper"); no field — neutral.
+ */
+export interface MessageSpeech {
+  speaker: string
+  voice: string
+  instruct?: string
+}
+
+export interface Message {
+  id: string // opaque handle; a driver may hand out positional ('pos:N')
+  role: string // 'user' | 'assistant' | 'system' | 'tool' | 'narrator' | ...
+  name?: string // display name (group chat)
+  parts: Part[] // primary content
+  flags?: MessageFlags
+  swipes?: { active: number; count: number } // capability: swipes
+  hash?: string // optimistic concurrency for edit
+  meta?: MessageMeta
+}
+
+export interface Usage {
+  input: number
+  output: number
+  /**
+   * Чтение кэша промпта, токенов (добавлением): часть входа, взятая из
+   * кэша провайдера. Нет — бэкенд не знает.
+   */
+  cacheRead?: number
+  /** Запись кэша промпта, токенов: часть входа, положенная в кэш на этом ходу. */
+  cacheWrite?: number
+  /**
+   * Контекст после хода: занято (`used`) из окна модели (`size`), токенов. У
+   * агента с собственной сессией (Claude Code через ACP) — его счёт; итог рана
+   * берёт последний.
+   */
+  context?: { used: number; size: number }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Part — closed core of types + escape hatch (custom) (protocol §2.3)
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface TextPart {
+  type: 'text'
+  text: string
+}
+
+export interface ThinkingPart {
+  type: 'thinking'
+  text: string
+  meta?: { signature?: string }
+}
+
+/**
+ * Subagent marks (protocol v1.60) — shared by tool_use and tool_result:
+ * `parent` — callId of the `Agent`/`Task` call whose subagent made this call. Such
+ * parts live in the subagent's own context, not the chat's: the front nests them
+ * under the parent and leaves them out of the chat's context meter.
+ * `subagentContext` (tool_result) — the subagent's context window after this call,
+ * tokens (from its transcript); on the parent's own result — the final one.
+ */
+export interface SubagentMarks {
+  parent?: string
+  subagentContext?: number
+}
+
+export interface ToolUsePart {
+  type: 'tool_use'
+  data: unknown
+  meta: { callId: string; name: string } & Pick<SubagentMarks, 'parent'>
+}
+
+export interface ToolResultPart {
+  type: 'tool_result'
+  data?: unknown
+  text?: string
+  meta: { callId: string; name?: string; error?: boolean } & SubagentMarks
+}
+
+export interface FilePart {
+  type: 'file'
+  /** Extracted text of the attachment — what actually rides into the LLM context. */
+  text?: string
+  /**
+   * `tokens` — the backend's estimate of what the attachment costs in context
+   * (attachments-spec §2: ≈ chars/3.5 for text). An estimate, not a count: the
+   * front sums it for the header meter, nobody bills by it.
+   */
+  meta: { name: string; mime?: string; url?: string; ref?: string; tokens?: number }
+}
+
+export interface ImagePart {
+  type: 'image'
+  /** Extracted/OCR text of the image — what actually rides into the LLM context. */
+  text?: string
+  /** `tokens` — context-cost estimate by the backend's own rule; absent = unknown. */
+  meta: { mime?: string; url?: string; ref?: string; alt?: string; tokens?: number }
+}
+
+export interface ErrorPart {
+  type: 'error'
+  text: string
+  meta?: { code?: string }
+}
+
+export interface CustomPart {
+  type: 'custom'
+  data?: unknown
+  text?: string
+  meta: { hint: string; [k: string]: unknown } // hint — a cue for the renderer
+}
+
+/** Closed core of part types. `custom` is the escape hatch (closedness preserved). */
+export type Part =
+  | TextPart
+  | ThinkingPart
+  | ToolUsePart
+  | ToolResultPart
+  | FilePart
+  | ImagePart
+  | ErrorPart
+  | CustomPart
+
+/** Literal `type` values for known parts (for guards). */
+export type KnownPartType = Part['type']
+
+/**
+ * Escape hatch: an unknown part type. Arrives under graceful degradation —
+ * rendered via a fallback, the client doesn't crash. No fields guaranteed
+ * except `type`.
+ */
+export interface UnknownPart {
+  type: string
+  [k: string]: unknown
+}
+
+/** Any part: known or opaque. */
+export type AnyPart = Part | UnknownPart
+
+// ────────────────────────────────────────────────────────────────────────────
+// Session structure (spec §3)
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Neutral session: info + open meta + nodes in storage append-order. `nodes` is
+ * the whole tree, not the active path: projections (`toHistory`, `toThread`)
+ * pick the slice they need out of it (§4).
+ */
+export interface SessionModel {
+  info: SessionInfo // id required
+  meta?: Record<string, unknown> // sessionMeta (open dictionary)
+  nodes: StoreNode[] // storage append-order
+}
+
+/**
+ * Storage node (spec §3). **Parent is always explicit** — the common
+ * denominator. Chain default ("no parent = previous node") and other encoding
+ * shortcuts live in the drivers: they expand them on load and fold them back on
+ * write.
+ */
+export interface StoreNode {
+  /**
+   * Session-scoped stable id. A driver without native ids hands out positional
+   * ones (`pos:N`).
+   */
+  id: string
+  /** EXPLICIT. `null` = root. A broken ref is treated as a root (§4). */
+  parent: string | null
+  role: string
+  name?: string
+  parts: Part[]
+  flags?: MessageFlags
+  /** Including model/usage/createdAt and driver-specifics. */
+  meta?: Record<string, unknown>
+}
+
+/**
+ * Write-mutation input (spec §5): parts (or text shortcut), role, explicit
+ * parent. `parent` unset → the driver attaches to the active leaf.
+ */
+export interface NodeInput {
+  /**
+   * Desired stable node id (spec §5, id-first). The driver honors it as the
+   * record's id, or generates its own when absent — so the caller knows the id
+   * before the write (run-lifecycle: the assistant's id in events == the
+   * record's id). An explicit field instead of smuggling it via `meta.id`.
+   */
+  id?: string
+  role: string
+  name?: string
+  /** Message parts. Mutually exclusive with `text`. */
+  parts?: Part[]
+  /** Shorthand for a single text-part. */
+  text?: string
+  /** Explicit parent. Unset → active leaf; `null` → new root. */
+  parent?: string | null
+  flags?: MessageFlags
+  meta?: Record<string, unknown>
+}

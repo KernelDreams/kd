@@ -1,0 +1,43 @@
+{
+  "name": "@kerneldreams/web",
+  "version": "0.1.0",
+  "description": "Web transport layer: fetch/cdp delivery, mdz adapters, live-Chrome supervisor, devtools. Carries raw bytes, understands nothing.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/web"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@kerneldreams/nrd": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

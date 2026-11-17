@@ -1,0 +1,31 @@
+$run: trace
+$card_path: ./bot.md
+
+Ботчат, шаг 2: источник — исходник бота (mdd).
+Изменились ТОЛЬКО объявление источника и маппинг полей.
+Шаблон и цикл дальше НЕ знают, откуда пришли данные.
+
+## $source card
+$nr: {type: 'file', parse: 'mdd'}
+$path: ${card_path}
+
+## $source bot
+$nr: {type: 'inline'}
+$name: ${card.name}
+$persona: ${card.personality}
+$scenario: ${card.scenario}
+$greeting: ${card.greeting}
+$system: ${card.system_prompt}
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  const f = (k) => {
+    const v = ctx.get(['bot', k])
+    const s = v == null ? '' : String(v)
+    return '  ' + k.padEnd(9) + String(s.length).padStart(6) + '  ' + s.slice(0,52).replace(/\s+/g, ' ')
+  }
+  return { output: ['источник: bot.md', '', '  поле        длина  начало']
+    .concat(['name','persona','scenario','greeting','system'].map(f)).join('\n') }
+}
+```

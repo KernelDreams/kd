@@ -1,0 +1,101 @@
+$editor: 1
+$id: campaign
+$title: Журнал кампании
+
+## $section campaign
+$title: Кампания
+
+### $field title
+$type: string
+$label: Название
+$required: true
+
+### $field system
+$type: string
+$label: Система
+$enum: $[fate, dnd5e, other]
+$widget: select
+$props: {labels: {fate: "Fate", dnd5e: "D&D 5e", other: "Другая"}}
+
+### $field started
+$type: string
+$label: Начата
+$widget: date
+
+## $section sessions
+$title: Сессии
+
+### $repeat sessions
+$item-title: title
+
+#### $field title
+$type: string
+$label: Название
+
+#### $field date
+$type: string
+$label: Дата
+$widget: date
+
+#### $field summary
+$type: string
+$label: Итоги
+$widget: markdown
+
+$// Вычисляемое «найдено улик в сессии» не записано: в выражении ntpl нет flatten/map, а улики лежат во вложенных сценах.
+
+#### $repeat scenes
+$item-title: title
+
+##### $field title
+$type: string
+$label: Название
+
+##### $field kind
+$type: string
+$label: Вид
+$enum: $[combat, social, explore]
+$widget: select
+$props: {labels: {combat: "Бой", social: "Социальная", explore: "Исследование"}}
+
+##### $field notes
+$type: string
+$label: Заметки
+$widget: textarea
+$props: {rows: 4}
+
+##### $field npcs
+$type: string[]
+$label: NPC
+$widget: tags
+
+##### $repeat initiative
+$label: Инициатива
+$item-title: name
+$show-if: {kind: ["combat"]}
+
+###### $field name
+$type: string
+$label: Имя
+
+###### $field roll
+$type: integer
+$label: Бросок
+
+##### $repeat clues
+$label: Улики
+$item-title: text
+
+###### $field text
+$type: string
+$label: Улика
+
+###### $field found
+$type: boolean
+$label: Найдена
+$widget: checkbox
+
+#### $computed foundClues
+$label: Найдено улик
+$expr: "<< item.scenes | pluck('clues') | flatten | selectattr('found') | length >>"
+$type: number

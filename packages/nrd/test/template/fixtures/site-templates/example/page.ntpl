@@ -1,0 +1,8 @@
+<{ nrd }>
+$required: resource, path
+
+## $source page
+$nr-type: http
+$path: path
+<{ endnrd }>
+# << page.title >>

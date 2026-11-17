@@ -1,0 +1,9 @@
+# Правила объектов комплекта kd (kd-cli-spec §4): действия файлов по виду.
+# Действие для kd — `$run: kd`, `$cmd` — слова вызова kd с ${}; `path` — путь файла, `text` — слово.
+
+## $action file.info
+$for: file
+$title: сведения о файле
+$run: kd
+$cmd: info ${path}
+$default: true

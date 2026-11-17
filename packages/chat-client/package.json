@@ -1,0 +1,51 @@
+{
+  "name": "@kerneldreams/chat-client",
+  "version": "0.1.0",
+  "description": "Zero-dependency UI protocol client for browser and Node: sessions, SSE runs over fetch, respond/cancel, profiles, models, auth, and a ProtocolBackend over HTTP.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/chat-client"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run",
+    "prepublishOnly": "node -e \"const p=require('./package.json');const bad=Object.entries({...p.dependencies,...p.peerDependencies}).filter(([,v])=>String(v).startsWith('file:'));if(bad.length){console.error('publish blocked: file: deps '+bad.map(([k])=>k).join(', '));process.exit(1)}\""
+  },
+  "peerDependencies": {
+    "@kerneldreams/ui-protocol": "0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@kerneldreams/ui-protocol": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@kerneldreams/ui-protocol": "0.1.0",
+    "@types/node": "^24.19.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

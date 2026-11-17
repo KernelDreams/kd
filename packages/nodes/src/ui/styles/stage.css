@@ -1,0 +1,26 @@
+/* ============================================================================
+   Stage — полотно карточек (полотно карточек вида схемы).
+   Весь файл в слое `nodes`: плагин nrchat не может ставить нелейерные стили (страж), а вид схемы
+   перекрывает этот вид своим слоем. Цвет провода — `--nn-stage-wire` / `--nn-stage-accent` у предка (вид схемы), иначе токены кита
+   --nr-wire-color, --nr-accent; на самом `.nn-stage` их не объявлять — перебьёт значение вида.
+   ============================================================================ */
+@layer nodes {
+.nn-stage {
+  position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; outline: none; user-select: none; -webkit-user-select: none;
+}
+.nn-stage:active { cursor: grabbing; }
+.nn-stage input, .nn-stage textarea, .nn-stage [contenteditable] { user-select: text; -webkit-user-select: text; }
+.nn-stage-layer { position: absolute; left: 0; top: 0; width: 1px; height: 1px; transform-origin: 0 0; will-change: transform; }
+.nn-stage-wires { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.nn-stage-wire-line { fill: none; stroke: var(--nn-stage-wire, var(--nr-wire-color, #8a8f98)); stroke-width: var(--nr-wire-w, 2px); }
+.nn-stage-wire-glow { fill: none; stroke: transparent; stroke-width: 10; filter: var(--nn-stage-glow); }
+.nn-stage-wire[data-picked] .nn-stage-wire-line, .nn-stage-wire[data-now] .nn-stage-wire-line { stroke: var(--nn-stage-accent, var(--nr-accent, #6b8afd)); stroke-width: var(--nr-wire-on-w, 3px); }
+.nn-stage-wire-hit { fill: none; stroke: transparent; stroke-width: 22; pointer-events: stroke; cursor: pointer; }
+.nn-stage-wire-pull { pointer-events: none; }
+.nn-stage-wire-pull .nn-stage-wire-line { stroke: var(--nn-stage-accent, var(--nr-accent, #6b8afd)); stroke-dasharray: 8 8; }
+.nn-stage-arrow-head { fill: var(--nn-stage-wire, var(--nr-wire-color, #8a8f98)); }
+.nn-stage-wire-label { position: absolute; width: max-content; transform: translate(-50%, -50%); z-index: 3; }
+.nn-stage-wire-end { position: absolute; z-index: 5; transform: translate(-50%, -50%); }
+.nn-stage [data-pin] { cursor: crosshair; }
+.nn-stage[data-connecting] [data-pin]:not([data-pin-ok]) { opacity: .25; }
+}

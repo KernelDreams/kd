@@ -1,0 +1,49 @@
+{
+  "name": "@kerneldreams/ui-protocol",
+  "version": "0.1.0",
+  "description": "Universal UI-to-backend protocol (v1): wire types and mapping helpers, no engine; the message model is re-exported from @kerneldreams/chat-store.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/ui-protocol"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./service": {
+      "types": "./dist/service.d.ts",
+      "import": "./dist/service.js"
+    },
+    "./links-rules": {
+      "types": "./dist/links-rules.d.ts",
+      "import": "./dist/links-rules.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc",
+    "test": "vitest run",
+    "prepublishOnly": "node -e \"const p=require('./package.json');const bad=Object.entries({...p.dependencies,...p.peerDependencies}).filter(([,v])=>String(v).startsWith('file:'));if(bad.length){console.error('publish blocked: file: deps '+bad.map(([k])=>k).join(', '));process.exit(1)}\""
+  },
+  "dependencies": {
+    "@kerneldreams/chat-store": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "@kerneldreams/nrd": "0.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

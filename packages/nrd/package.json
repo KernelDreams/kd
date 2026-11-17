@@ -1,0 +1,115 @@
+{
+  "name": "@kerneldreams/nrd",
+  "version": "0.1.0",
+  "description": "NRD documents: mdd/mdz formats, resolver, context assembly, block execution and templates; one package with subpaths per platform (core, web, node, template, format).",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/nrd"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./web": {
+      "types": "./dist/web/index.d.ts",
+      "import": "./dist/web/index.js"
+    },
+    "./node": {
+      "types": "./dist/node/index.d.ts",
+      "import": "./dist/node/index.js"
+    },
+    "./template": {
+      "types": "./dist/template/index.d.ts",
+      "import": "./dist/template/index.js"
+    },
+    "./format": {
+      "types": "./dist/format/index.d.ts",
+      "import": "./dist/format/index.js"
+    },
+    "./batch": {
+      "types": "./dist/batch/index.d.ts",
+      "import": "./dist/batch/index.js"
+    },
+    "./json5": {
+      "types": "./dist/json5/index.d.ts",
+      "import": "./dist/json5/index.js",
+      "default": "./dist/json5/index.js"
+    },
+    "./md": {
+      "types": "./dist/md/index.d.ts",
+      "import": "./dist/md/index.js",
+      "default": "./dist/md/index.js"
+    },
+    "./md/schema": {
+      "types": "./dist/md/schema.d.ts",
+      "import": "./dist/md/schema.js",
+      "default": "./dist/md/schema.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts/index.d.ts",
+      "import": "./dist/contracts/index.js",
+      "default": "./dist/contracts/index.js"
+    },
+    "./contracts/eval": {
+      "types": "./dist/contracts/eval/index.d.ts",
+      "import": "./dist/contracts/eval/index.js",
+      "default": "./dist/contracts/eval/index.js"
+    },
+    "./chat": {
+      "types": "./dist/chat/index.d.ts",
+      "import": "./dist/chat/index.js"
+    },
+    "./chat/global": "./dist/chat/nr-chat.global.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "NOTICE"
+  ],
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc && node scripts/chat/global.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "node scripts/smoke-pack.mjs",
+    "prepublishOnly": "node -e \"const p=require('./package.json');const bad=Object.entries({...p.dependencies,...p.peerDependencies}).filter(([,v])=>String(v).startsWith('file:'));if(bad.length){console.error('publish blocked: file: deps '+bad.map(([k])=>k).join(', '));process.exit(1)}\""
+  },
+  "dependencies": {
+    "zx": "^8.1.0"
+  },
+  "peerDependencies": {
+    "ajv": "^8.12.0",
+    "handlebars": "^4.7.8",
+    "nunjucks": "^3.2.4"
+  },
+  "peerDependenciesMeta": {
+    "ajv": {
+      "optional": true
+    },
+    "handlebars": {
+      "optional": true
+    },
+    "nunjucks": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "@types/nunjucks": "^3.2.6",
+    "handlebars": "^4.7.8",
+    "nunjucks": "^3.2.4",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

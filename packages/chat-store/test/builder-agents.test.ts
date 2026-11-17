@@ -1,0 +1,131 @@
+import { describe, expect, it } from 'vitest'
+import { agentDocOf, agentEngineModel, agentText, agentVoiceOf, isAgentFile } from '../src/builder/index.js'
+
+const TEXT = `%meta {name: "nrchat", description: "рабочий", engine: "claude-acp", model: "opus", card: "alice", cwd: "~/x"}
+%%tools
+all
+%system
+Ты — агент. <{ files "a.md" }>
+%include nrchat.example.mds
+%user
+<{ history }><{ endhistory }>
+`
+
+describe('агент .mds ↔ ProfileDoc (ABC-314)', () => {
+  it('файлы каталога', () => {
+    expect(isAgentFile('a.mds')).toBe(true)
+    expect(isAgentFile('a.example.mds')).toBe(false)
+    expect(isAgentFile('.a.mds')).toBe(false)
+    expect(isAgentFile('a.mdz')).toBe(false)
+  })
+
+  it('мета → документ, шаблон — сам файл', () => {
+    const d = agentDocOf('nrchat', TEXT, '/e/agents/nrchat.mds')
+    expect(d).toMatchObject({ id: 'nrchat', name: 'nrchat', description: 'рабочий', engine: 'claude-acp', model: 'opus', card: 'alice', template: '/e/agents/nrchat.mds', source: 'agents', tools: 'all' })
+  })
+
+  it('прочие поля меты — в extra текстом (tool_policy, max_turns): движок nr читает их оттуда', () => {
+    const d = agentDocOf('p', '%meta {engine: "nr", tool_policy: {exec: "auto"}, max_turns: 200, cwd: "~/x"}\n%system\nx\n', '/e/agents/p.mds')
+    expect(d.extra).toEqual({ tool_policy: '{"exec":"auto"}', max_turns: '200', cwd: '~/x' })
+    expect(agentDocOf('nrchat', TEXT, '/f').extra).toEqual({ cwd: '~/x' })
+  })
+
+  it('сохранение меняет только строку %meta, чужие ключи на месте', () => {
+    const d = agentDocOf('nrchat', TEXT, '/e/agents/nrchat.mds')
+    const out = agentText({ ...d, model: 'sonnet', engine: undefined, description: 'новое' }, TEXT)
+    const back = agentDocOf('nrchat', out, '/x.mds')
+    expect(back.model).toBe('sonnet')
+    expect(back.engine).toBeUndefined()
+    expect(back.description).toBe('новое')
+    expect(out).toContain('cwd:')
+    expect(out.split('\n').slice(1).join('\n')).toBe(TEXT.split('\n').slice(1).join('\n'))
+  })
+
+  it('новый агент из старого профиля nr: systemPrompt → %system, история в конце', () => {
+    const out = agentText({ id: 'agent', name: 'Agent', systemPrompt: 'Будь краток.', tools: ['read', 'bash'], model: 'm1' })
+    expect(out).toMatch(/^%meta \{/)
+    expect(out).toContain('%system\nБудь краток.')
+    expect(out.trimEnd().endsWith('<{ history }><{ endhistory }>')).toBe(true)
+    const back = agentDocOf('agent', out, '/a.mds')
+    expect(back).toMatchObject({ name: 'Agent', model: 'm1', tools: ['read', 'bash'] })
+  })
+
+  it('voice меты → документ (LLM-12): незнакомое отбрасывается, в extra не уходит', () => {
+    const d = agentDocOf('sw', '%meta {name: "storywriter", voice: {mode: "verbatim", refine: "always"}}\n%system\nx\n', '/e/agents/sw.mds')
+    expect(d.voice).toEqual({ mode: 'verbatim', refine: 'always' })
+    expect(d.extra).toBeUndefined()
+    expect(agentDocOf('a', '%meta {voice: {mode: "loud", refine: "always"}}\n%system\nx\n', '/a.mds').voice).toEqual({ refine: 'always' })
+    expect(agentDocOf('a', '%meta {voice: {mode: "loud"}}\n%system\nx\n', '/a.mds').voice).toBeUndefined()
+    expect(agentDocOf('nrchat', TEXT, '/f').voice).toBeUndefined()
+    expect(agentVoiceOf('verbatim')).toBeUndefined()
+  })
+
+  it('voice.say — голос озвучки агента (ABC-497): строка, пустое отбрасывается', () => {
+    expect(agentVoiceOf({ say: ' edge:ru-RU-SvetlanaNeural ', refine: 'off' })).toEqual({ refine: 'off', say: 'edge:ru-RU-SvetlanaNeural' })
+    expect(agentVoiceOf({ say: '' })).toBeUndefined()
+    expect(agentVoiceOf({ say: 5 })).toBeUndefined()
+    const d = agentDocOf('sw', '%meta {name: "sw", voice: {say: "v1"}}\n%system\nx\n', '/sw.mds')
+    const saved = agentText({ ...d, voice: { say: 'v2' } }, '%meta {name: "sw", voice: {say: "v1"}}\n%system\nx\n')
+    expect(agentDocOf('sw', saved, '/sw.mds').voice).toEqual({ say: 'v2' })
+  })
+
+  it('voice переживает сохранение: правится документом, тело на месте', () => {
+    const text = '%meta {name: "storywriter", voice: {mode: "verbatim", refine: "always"}, cwd: "~/x"}\n%system\nx\n'
+    const d = agentDocOf('sw', text, '/e/agents/sw.mds')
+    expect(agentDocOf('sw', agentText({ ...d, model: 'm1' }, text), '/x.mds').voice).toEqual({ mode: 'verbatim', refine: 'always' })
+    const off = agentText({ ...d, voice: { mode: 'smart', refine: 'off' } }, text)
+    expect(agentDocOf('sw', off, '/x.mds').voice).toEqual({ mode: 'smart', refine: 'off' })
+    expect(agentText({ ...d, voice: undefined }, text)).not.toContain('voice')
+    expect(off.split('\n').slice(1).join('\n')).toBe('%system\nx\n')
+  })
+
+  it('пресет RP (RPG-4): копия старого профиля — шапка с общим шаблоном, промпт и лорбук живут в файле', () => {
+    const legacy = { id: 'hard', name: 'Жёстко', tools: 'none' as const, prompt: { pre: 'Ты GM.\n\nБез цензуры.', post: 'Пиши по-русски.' }, impersonate: 'За игрока', extra: { template: 'rp.mds', lorebook_budget: '16000', memory: 'off', temperature: '0.8' } }
+    const text = agentText(legacy)
+    const d = agentDocOf('hard', text, '/e/agents/hard.mds')
+    expect(d.template).toBeUndefined()
+    expect(d).toMatchObject({ tools: 'none', prompt: legacy.prompt, impersonate: 'За игрока', extra: legacy.extra })
+  })
+
+  it('пресет: правка документа меняет поля, настройки агента и узлы шаблона целы', () => {
+    const file = '%meta {name: "a", settings: {"nrchat-rp": {editorOn: "off"}}}\n%%files\na.md\n%%pre\nстарый\n%system\n<< agent.pre >>\n'
+    const doc = agentDocOf('a', file, '/e/agents/a.mds')
+    expect(doc.extra?.settings).toContain('editorOn')
+    const next = agentText({ ...doc, prompt: { post: 'новый хвост' }, extra: { ...doc.extra, temperature: '0.7' } }, file)
+    const back = agentDocOf('a', next, '/e/agents/a.mds')
+    expect(back.prompt).toEqual({ post: 'новый хвост' })
+    expect(back.extra).toMatchObject({ temperature: '0.7', settings: doc.extra!.settings })
+    expect(next).toContain('%%files\na.md')
+    expect(next).toContain('%system\n<< agent.pre >>')
+    expect(next).not.toContain('старый')
+  })
+
+  it('поле документа сильнее той же записи в extra старого профиля', () => {
+    const text = agentText({ id: 'a', name: 'a', voice: { mode: 'verbatim' }, extra: { template: 'rp.mds', voice: '{mode: "verbatim"}' } })
+    expect(agentDocOf('a', text, '/f').voice).toEqual({ mode: 'verbatim' })
+  })
+
+  it('поле не трогает комментарий файла и не проглатывает его', () => {
+    const next = agentText({ id: 'a', name: 'a', prompt: { pre: 'p' } }, '%meta {name: "a"}\nкомментарий\n%system\nx\n')
+    expect(next).toBe("%meta {name: 'a'}\nкомментарий\n%%pre\np\n%system\nx\n")
+  })
+})
+
+describe('модель агента на движке (ABC-609)', () => {
+  it('models меты → по движку; нет записи — undefined', () => {
+    const d = agentDocOf('a', `%meta {name: 'a', engine: 'acp', model: 'opus', models: {nr: 'opus-sub'}}\n%system\nS\n`, '/a.mds')
+    expect(agentEngineModel(d, 'nr')).toBe('opus-sub')
+    expect(agentEngineModel(d, 'pi')).toBeUndefined()
+    expect(agentEngineModel({ models: { nr: 'x' } }, 'nr')).toBe('x')
+    expect(agentEngineModel(undefined, 'nr')).toBeUndefined()
+  })
+})
+
+describe('лицо агента (icons-spec §4.1, ABC-682)', () => {
+  it('icon / avatar в %meta → документ → текст и обратно', () => {
+    const d = agentDocOf('aishka', agentText({ id: 'aishka', name: 'Аишка', icon: '🦊', avatar: 'aishka.png' }), '/a/aishka.mds')
+    expect(d.icon).toBe('🦊')
+    expect(d.avatar).toBe('aishka.png')
+    expect(d.extra?.icon).toBeUndefined()
+  })
+})

@@ -1,0 +1,85 @@
+<nr-editor id="fate-condensed" title="Fate Condensed">
+  <script type="application/schema+json">
+{
+    "type": "object", "required": ["name"],
+    "properties": {
+      "name": {"type":"string","title":"Имя"},
+      "description": {"type":"string","title":"Описание"},
+      "portrait": {"type":"string","title":"Портрет"},
+      "highConcept": {"type":"string","title":"Концепция"},
+      "trouble": {"type":"string","title":"Проблема"},
+      "aspects": {"type":"array","items":{"type":"object","properties":{"text":{"type":"string","title":"Аспект"}}}},
+      "skills": {"type":"object","properties":{"academics":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Academics"},"athletics":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Athletics"},"burglary":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Burglary"},"contacts":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Contacts"},"crafts":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Crafts"},"deceive":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Deceive"},"drive":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Drive"},"empathy":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Empathy"},"fight":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Fight"},"investigate":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Investigate"},"lore":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Lore"},"notice":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Notice"},"physique":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Physique"},"provoke":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Provoke"},"rapport":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Rapport"},"resources":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Resources"},"shoot":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Shoot"},"stealth":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Stealth"},"will":{"type":"integer","minimum":-2,"maximum":8,"default":0,"title":"Will"}}},
+      "stunts": {"type":"array","items":{"type":"object","properties":{"name":{"type":"string","title":"Название"},"description":{"type":"string","title":"Описание"}}}},
+      "refresh": {"type":"integer","minimum":0,"default":3,"title":"Восстановление"},
+      "fatePoints": {"type":"integer","minimum":0,"default":3,"title":"Жетоны судьбы"},
+      "stress": {"type":"object","properties":{"physical":{"type":"array","items":{"type":"boolean"}},"mental":{"type":"array","items":{"type":"boolean"}}}},
+      "consequences": {"type":"object","properties":{"mild":{"type":"string"},"moderate":{"type":"string"},"severe":{"type":"string"}}}
+    }
+  }
+  </script>
+  <style>
+    .panel { border: 1px solid var(--nr-line); border-radius: var(--nr-radius); padding: var(--nr-space-4); }
+    .row { display: flex; gap: var(--nr-space-4); }
+    h2 { font-family: var(--nr-font-ui); color: var(--nr-accent); }
+  </style>
+  <section data-section="character" data-title="Персонаж" class="panel">
+    <h2>Персонаж</h2>
+    <div data-row class="row">
+      <nr-widget data-path="portrait" data-widget="image" data-props='{"aspect":"2:3"}'></nr-widget>
+      <input data-path="name">
+    </div>
+    <textarea data-path="description" data-props='{"rows":4}'></textarea>
+    <div data-row class="row">
+      <nr-widget data-path="refresh" data-widget="number" data-props='{"min":0}'></nr-widget>
+      <nr-widget data-path="fatePoints" data-widget="number" data-props='{"min":0}'></nr-widget>
+    </div>
+  </section>
+  <section data-section="aspects" data-title="Аспекты" class="panel">
+    <h2>Аспекты</h2>
+    <nr-widget data-path="highConcept" data-widget="fate.aspect" data-props='{"kind":"high-concept"}'></nr-widget>
+    <nr-widget data-path="trouble" data-widget="fate.aspect" data-props='{"kind":"trouble"}'></nr-widget>
+    <div data-repeat="aspects" data-item-title="text" data-label="Другие аспекты">
+      <nr-widget data-path="text" data-widget="fate.aspect" data-props='{"kind":"other"}'></nr-widget>
+    </div>
+  </section>
+  <section data-section="skills" data-title="Навыки" class="panel">
+    <h2>Навыки</h2>
+    <nr-widget data-path="skills.academics" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.athletics" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.burglary" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.contacts" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.crafts" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.deceive" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.drive" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.empathy" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.fight" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.investigate" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.lore" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.notice" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.physique" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.provoke" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.rapport" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.resources" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.shoot" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.stealth" data-widget="fate.ladder"></nr-widget>
+    <nr-widget data-path="skills.will" data-widget="fate.ladder"></nr-widget>
+  </section>
+  <section data-section="stunts" data-title="Трюки" class="panel">
+    <h2>Трюки</h2>
+    <div data-repeat="stunts" data-item-title="name">
+      <input data-path="name">
+      <textarea data-path="description" data-props='{"rows":3}'></textarea>
+    </div>
+  </section>
+  <section data-section="stress" data-title="Стресс и последствия" class="panel">
+    <h2>Стресс и последствия</h2>
+    <output data-computed="physicalBoxes" data-type="number" data-label="Ячеек физического"><< 3 + (1 if skills.physique >= 1 else 0) + (1 if skills.physique >= 3 else 0) >></output>
+    <output data-computed="mentalBoxes" data-type="number" data-label="Ячеек ментального"><< 3 + (1 if skills.will >= 1 else 0) + (1 if skills.will >= 3 else 0) >></output>
+    <nr-widget data-path="stress.physical" data-widget="fate.stress-track" data-label="Физический" data-props='{"boxes":"=physicalBoxes"}'></nr-widget>
+    <nr-widget data-path="stress.mental" data-widget="fate.stress-track" data-label="Ментальный" data-props='{"boxes":"=mentalBoxes"}'></nr-widget>
+    <nr-widget data-path="consequences.mild" data-widget="fate.consequence" data-label="Лёгкое" data-props='{"severity":"mild","value":2}'></nr-widget>
+    <nr-widget data-path="consequences.moderate" data-widget="fate.consequence" data-label="Среднее" data-props='{"severity":"moderate","value":4}'></nr-widget>
+    <nr-widget data-path="consequences.severe" data-widget="fate.consequence" data-label="Тяжёлое" data-props='{"severity":"severe","value":6}'></nr-widget>
+  </section>
+</nr-editor>

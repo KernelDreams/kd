@@ -1,0 +1,530 @@
+{
+  "editor": 1,
+  "id": "fate-condensed",
+  "title": "Fate Condensed",
+  "schema": {
+    "type": "object",
+    "required": [
+      "name"
+    ],
+    "properties": {
+      "name": {
+        "type": "string",
+        "title": "Имя"
+      },
+      "description": {
+        "type": "string",
+        "title": "Описание"
+      },
+      "portrait": {
+        "type": "string",
+        "title": "Портрет"
+      },
+      "highConcept": {
+        "type": "string",
+        "title": "Концепция"
+      },
+      "trouble": {
+        "type": "string",
+        "title": "Проблема"
+      },
+      "aspects": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "title": "Аспект"
+            }
+          }
+        }
+      },
+      "skills": {
+        "type": "object",
+        "properties": {
+          "academics": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Academics"
+          },
+          "athletics": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Athletics"
+          },
+          "burglary": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Burglary"
+          },
+          "contacts": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Contacts"
+          },
+          "crafts": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Crafts"
+          },
+          "deceive": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Deceive"
+          },
+          "drive": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Drive"
+          },
+          "empathy": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Empathy"
+          },
+          "fight": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Fight"
+          },
+          "investigate": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Investigate"
+          },
+          "lore": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Lore"
+          },
+          "notice": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Notice"
+          },
+          "physique": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Physique"
+          },
+          "provoke": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Provoke"
+          },
+          "rapport": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Rapport"
+          },
+          "resources": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Resources"
+          },
+          "shoot": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Shoot"
+          },
+          "stealth": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Stealth"
+          },
+          "will": {
+            "type": "integer",
+            "minimum": -2,
+            "maximum": 8,
+            "default": 0,
+            "title": "Will"
+          }
+        }
+      },
+      "stunts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Название"
+            },
+            "description": {
+              "type": "string",
+              "title": "Описание"
+            }
+          }
+        }
+      },
+      "refresh": {
+        "type": "integer",
+        "minimum": 0,
+        "default": 3,
+        "title": "Восстановление"
+      },
+      "fatePoints": {
+        "type": "integer",
+        "minimum": 0,
+        "default": 3,
+        "title": "Жетоны судьбы"
+      },
+      "stress": {
+        "type": "object",
+        "properties": {
+          "physical": {
+            "type": "array",
+            "items": {
+              "type": "boolean"
+            }
+          },
+          "mental": {
+            "type": "array",
+            "items": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "consequences": {
+        "type": "object",
+        "properties": {
+          "mild": {
+            "type": "string",
+            "title": "Лёгкое"
+          },
+          "moderate": {
+            "type": "string",
+            "title": "Среднее"
+          },
+          "severe": {
+            "type": "string",
+            "title": "Тяжёлое"
+          }
+        }
+      }
+    }
+  },
+  "layout": [
+    {
+      "node": "section",
+      "id": "character",
+      "title": "Персонаж",
+      "children": [
+        {
+          "node": "field",
+          "path": "portrait",
+          "widget": "image",
+          "props": {
+            "aspect": "2:3"
+          },
+          "row": "r1"
+        },
+        {
+          "node": "field",
+          "path": "name",
+          "row": "r1"
+        },
+        {
+          "node": "field",
+          "path": "description",
+          "widget": "textarea",
+          "props": {
+            "rows": 4
+          }
+        },
+        {
+          "node": "field",
+          "path": "refresh",
+          "widget": "number",
+          "props": {
+            "min": 0
+          },
+          "row": "r2"
+        },
+        {
+          "node": "field",
+          "path": "fatePoints",
+          "widget": "fate.fate-points",
+          "props": {
+            "refreshFrom": "refresh"
+          },
+          "row": "r2"
+        }
+      ]
+    },
+    {
+      "node": "section",
+      "id": "aspects",
+      "title": "Аспекты",
+      "children": [
+        {
+          "node": "field",
+          "path": "highConcept",
+          "widget": "fate.aspect",
+          "props": {
+            "kind": "high-concept"
+          }
+        },
+        {
+          "node": "field",
+          "path": "trouble",
+          "widget": "fate.aspect",
+          "props": {
+            "kind": "trouble"
+          }
+        },
+        {
+          "node": "repeat",
+          "path": "aspects",
+          "label": "Другие аспекты",
+          "itemTitle": "text",
+          "children": [
+            {
+              "node": "field",
+              "path": "text",
+              "widget": "fate.aspect",
+              "props": {
+                "kind": "other"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "node": "section",
+      "id": "skills",
+      "title": "Навыки",
+      "children": [
+        {
+          "node": "field",
+          "path": "skills.academics",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.athletics",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.burglary",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.contacts",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.crafts",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.deceive",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.drive",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.empathy",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.fight",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.investigate",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.lore",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.notice",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.physique",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.provoke",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.rapport",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.resources",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.shoot",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.stealth",
+          "widget": "fate.ladder"
+        },
+        {
+          "node": "field",
+          "path": "skills.will",
+          "widget": "fate.ladder"
+        }
+      ]
+    },
+    {
+      "node": "section",
+      "id": "stunts",
+      "title": "Трюки",
+      "children": [
+        {
+          "node": "repeat",
+          "path": "stunts",
+          "itemTitle": "name",
+          "children": [
+            {
+              "node": "field",
+              "path": "name"
+            },
+            {
+              "node": "field",
+              "path": "description",
+              "widget": "textarea",
+              "props": {
+                "rows": 3
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "node": "section",
+      "id": "stress",
+      "title": "Стресс и последствия",
+      "children": [
+        {
+          "node": "computed",
+          "id": "physicalBoxes",
+          "label": "Ячеек физического",
+          "expr": "<< 3 + (1 if skills.physique >= 1 else 0) + (1 if skills.physique >= 3 else 0) >>",
+          "type": "number"
+        },
+        {
+          "node": "computed",
+          "id": "mentalBoxes",
+          "label": "Ячеек ментального",
+          "expr": "<< 3 + (1 if skills.will >= 1 else 0) + (1 if skills.will >= 3 else 0) >>",
+          "type": "number"
+        },
+        {
+          "node": "field",
+          "path": "stress.physical",
+          "widget": "fate.stress-track",
+          "label": "Физический",
+          "props": {
+            "boxes": "=physicalBoxes"
+          }
+        },
+        {
+          "node": "field",
+          "path": "stress.mental",
+          "widget": "fate.stress-track",
+          "label": "Ментальный",
+          "props": {
+            "boxes": "=mentalBoxes"
+          }
+        },
+        {
+          "node": "field",
+          "path": "consequences.mild",
+          "widget": "fate.consequence",
+          "label": "Лёгкое",
+          "props": {
+            "severity": "mild",
+            "value": 2
+          }
+        },
+        {
+          "node": "field",
+          "path": "consequences.moderate",
+          "widget": "fate.consequence",
+          "label": "Среднее",
+          "props": {
+            "severity": "moderate",
+            "value": 4
+          }
+        },
+        {
+          "node": "field",
+          "path": "consequences.severe",
+          "widget": "fate.consequence",
+          "label": "Тяжёлое",
+          "props": {
+            "severity": "severe",
+            "value": 6
+          }
+        }
+      ]
+    }
+  ]
+}

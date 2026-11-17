@@ -1,0 +1,978 @@
+/* -------- FRONT MATTER ---------
+** Theme: Obsidian Typewriter
+** Version number: 2.1.9
+** GitHub Repo: https://github.com/crashmoney/obsidian-typewriter
+** Made by: crashmoney
+----------------------------------- */
+
+/* +++ TOC
+|_ FONT FACES
+|_ COLOR VARIABLES
+|_ LIGHT MODE
+|_ DARK MODE
+|_ TYPOGRAPHY & FONTS
+|_ UI ELEMENTS
+|_ PLUGINS
+|_ STYLE SETTINGS
+|_ OBSIDIAN HUB
+*/
+
+/* +++ FONT FACES {{{ */
+
+@font-face /* iA Writer Mono V */ {
+  font-family: "iA Writer Mono V";
+  src: url("data:,")
+      format("woff2"),
+    url("data:,")
+      format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* iA Writer Quattro S */
+@font-face {
+  font-family: "iA Writer Quattro S";
+  src: url("data:,")
+    format("truetype");
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Quattro S";
+  src: url("data:,")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Quattro S";
+  src: url("data:,")
+    format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Quattro S";
+  src: url("data:,")
+    format("truetype");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face /* JetBrains Mono */ {
+  font-family: "JetBrains Mono";
+  src: url("data:,")
+      format("woff2"),
+    url("data:,")
+      format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* }}} */
+
+/* +++ COLOR VARIABLES {{{ */
+body {
+  --base-h: 0;
+  --base-s: 0%;
+  --base-d: 15%; /* base lightness for dark mode. 0 is black */
+  --base-l: 96%; /* base lightness for light mode. 100 is white */
+
+  /* Get accent from Style settings, defaults to rgb: 81, 157, 92 for both dark and light themes */
+  --theme-accent-h: var(--accent-h, 129);
+  --theme-accent-s: var(--accent-s, 31.9%);
+  --theme-accent-l: var(--accent-l, 46.7%);
+
+  /* WIP - working with relative HSL values
+  --theme-accent-h: calc(var(--accent-h) - 125);
+  --theme-accent-d: calc(var(--accent-d) - 21.3%);
+  --theme-accent-l: calc(var(--accent-l) - 21.3%);
+  --theme-accent-s: calc(var(--accent-s) - 48.1%);
+  */
+}
+
+/* +++ LIGHT MODE {{{ */
+.theme-light {
+  --background-primary: hsl(
+    calc(var(--base-h) + 44),
+    calc(var(--base-s) + 79%),
+    calc(var(--base-l) - 2%)
+  );
+  --background-primary-alt: #fcf5e4;
+  --background-secondary: hsl(
+    calc(var(--base-h) + 42),
+    calc(var(--base-s) + 34%),
+    calc(var(--base-l) - 12%)
+  );
+  --background-secondary-alt: #fcf5e4;
+  --background-transparent: hsla(
+    var(--base-h),
+    var(--base-s),
+    var(--base-l),
+    0
+  );
+  --background-translucent: rgba(255, 255, 255, 0.85);
+  --background-modifier-border: hsl(
+    var(--base-h),
+    var(--base-s),
+    calc(var(--base-l) - 6%)
+  );
+  --background-modifier-border-hover: hsl(
+    var(--base-h),
+    var(--base-s),
+    calc(var(--base-l) - 12%)
+  );
+  --background-modifier-border-focus: hsl(
+    var(--base-h),
+    var(--base-s),
+    calc(var(--base-l) - 20%)
+  );
+  --background-modifier-form-field: hsl(
+    var(--base-h),
+    var(--base-s),
+    calc(var(--base-l) + 6%)
+  );
+  --background-modifier-form-field-highlighted: hsl(
+    var(--base-h),
+    var(--base-s),
+    calc(var(--base-l) + 8%)
+  );
+
+  --color-accent: hsl(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    var(--theme-accent-l)
+  );
+  --background-modifier-accent: hsl(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    calc(var(--theme-accent-l) + 10%)
+  );
+  --vim-cursor: hsla(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    var(--theme-accent-l),
+    0.8
+  );
+  --text-accent: hsl(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    var(--theme-accent-l)
+  );
+  --text-accent-hover: hsl(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    calc(var(--theme-accent-l) - 10%)
+  );
+  --text-normal: hsl(var(--base-h), var(--base-s), var(--base-d));
+  --text-muted: hsl(var(--base-h), var(--base-s), calc(var(--base-d) + 20%));
+  --text-faint: hsl(var(--base-h), var(--base-s), calc(var(--base-d) + 47%));
+
+  --text-highlight-bg: hsla(53, 100%, 50%, 0.5);
+  --text-highlight-bg-active: rgba(255, 128, 0, 0.4);
+  --text-selection: rgba(204, 230, 255, 0.99);
+  --text-on-accent: #f2f2f2;
+
+  --interactive-normal: #f2f3f5;
+  --interactive-hover: #e9e9e9;
+  --interactive-accent: hsl(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    calc(var(--theme-accent-l) + 10%)
+  );
+  --interactive-accent-hover: hsl(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    calc(var(--theme-accent-l) - 0%)
+  );
+  --interactive-accent-rgb: 123, 108, 217;
+  --interactive-success: #197300;
+
+  --scrollbar-active-thumb-bg: rgba(0, 0, 0, 0.2);
+  --scrollbar-bg: rgba(0, 0, 0, 0.05);
+  --scrollbar-thumb-bg: rgba(0, 0, 0, 0.1);
+  --highlight-mix-blend-mode: darken;
+
+  --icon-color: var(--text-muted);
+  --icon-hex: 000;
+
+  --graph-line-color: #c0c9ce;
+  
+  --code-background: #eee8d5;
+}
+/* }}} */
+
+/* +++ DARK MODE {{{ */
+.theme-dark {
+  --background-primary: hsl(var(--base-h), var(--base-s), var(--base-d));
+  --background-primary-alt: #202020;
+  --background-secondary: hsl(
+    calc(var(--base-h) + 30),
+    calc(var(--base-s) + 11.5%),
+    calc(var(--base-l) - 75.6%)
+  );
+  --background-secondary-alt: #000000;
+  --background-modifier-border: #333;
+  --background-modifier-border-hover: rgb(94, 94, 94);
+  --background-modifier-border-focus: hsl(
+    var(--base-h),
+    var(--base-s),
+    calc(var(--base-l) - 60%)
+  );
+  --background-modifier-accent: hsl(
+    var(--accent-h),
+    var(--accent-s),
+    var(--accent-d)
+  );
+  --background-modifier-form-field: rgba(0, 0, 0, 0.3);
+  --background-modifier-form-field-highlighted: rgba(0, 0, 0, 0.22);
+  --background-modifier-box-shadow: rgba(0, 0, 0, 0.3);
+  --background-modifier-success: #197300;
+  --background-modifier-error: #3d0000;
+  --background-modifier-error-rgb: 61, 0, 0;
+  --background-modifier-error-hover: #470000;
+  --background-modifier-cover: rgba(0, 0, 0, 0.8);
+
+  --vim-cursor: hsla(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    var(--theme-accent-l),
+    0.8
+  );
+  --color-accent: hsl(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    var(--theme-accent-l)
+  );
+  --text-accent-hover: hsl(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    calc(var(--theme-accent-l) - 10%)
+  );
+  --text-normal: rgb(197, 184, 161);
+  --text-muted: hsl(var(--base-h), var(--base-s), calc(var(--base-d) + 45%));
+  --text-faint: hsl(var(--base-h), var(--base-s), calc(var(--base-d) + 47%));
+  --text-error: rgb(230,60,60);
+  --text-error-hover: #990000;
+
+  --text-highlight-bg: rgba(255, 177, 80, 0.3);
+  --text-highlight-bg-active: rgba(255, 128, 0, 0.4);
+  --text-selection: rgba(23, 48, 77, 0.99);
+  --text-on-accent: #dcddde;
+  --interactive-normal: #2a2a2a;
+  --interactive-hover: #303030;
+  --interactive-accent: hsl(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    calc(var(--theme-accent-l) + 10%)
+  );
+  --interactive-accent-hover: hsl(
+    var(--theme-accent-h),
+    var(--theme-accent-s),
+    calc(var(--theme-accent-l) - 0%)
+  );
+  --interactive-accent-rgb: 72, 54, 153;
+  --interactive-success: #197300;
+  --scrollbar-active-thumb-bg: rgba(255, 255, 255, 0.2);
+  --scrollbar-bg: rgba(255, 255, 255, 0.05);
+  --scrollbar-thumb-bg: rgba(255, 255, 255, 0.1);
+  --highlight-mix-blend-mode: lighten;
+
+  --graph-line-color: #6f7577;
+}
+/* }}} */
+
+/* }}} */
+
+/* +++ TYPOGRAPHY & FONTS {{{ */
+body {
+  --font-text-theme: "iA Writer Quattro S";
+  --font-interface-theme: var(--font-text-theme);
+  --font-editor-theme: "iA Writer Mono V";
+  --font-editor: var(--font-text-theme), var(--font-text-override), var(--font-editor-theme);
+  --font-monospace-default: "JetBrains Mono";
+  --font-monospace: var(--font-monospace-override), var(--font-monospace-theme), var(--font-monospace-default);
+  font-variant-emoji: unicode !important; /* emoji will override numbers and special characters */
+  --metadata-input-font-size: var(--font-small);
+  --bases-table-font-size: var(--font-normal-size);
+
+  --font-normal-size: 1em;
+  --font-small: 0.813em;
+  --font-smaller: 0.688em;
+  --font-smallest: 0.625em;
+
+  --code-size: 0.85em;
+  --code-normal: var(--blue);
+
+  --h1: 1.8em;
+  --h2: 1.55em;
+  --h3: 1.35em;
+  --h4: 1.15em;
+  --h5: 1em;
+  --h6: 0.95em;
+
+  --h1-weight: 600;
+  --h2-weight: 600;
+  --h3-weight: 550;
+  --h4-weight: 550;
+  --h5-weight: 550;
+  --h6-weight: 550;
+
+  --h1-color: var(--text-normal);
+  --h2-color: var(--text-normal);
+  --h3-color: var(--text-normal);
+  --h4-color: var(--text-normal);
+  --h5-color: var(--text-normal);
+  --h6-color: var(--text-normal);
+
+  --normal-weight: 500;
+  --bold-weight: 620;
+  --line-width: 40rem; /* Maximum characters per line */
+  --line-height: 1.5;
+  --max-width: 88%; /* Amount of padding around the text, use 90% for narrower padding */
+  --icon-muted: 0.5;
+  --border-width: 1px;
+  --border-width-alt: 1px;
+
+  --radius-s: 2px;
+  --radius-m: 5px;
+  --radius-l: 10px;
+
+  --input-height: 32px;
+  --header-height: 40px;
+
+  --yellow: #e5b567;
+  --green: #b4d273;
+  --orange: #e87d3e;
+  --purple: #9e86c8;
+  --pink: #b05279;
+  --blue: #6c99bb;
+
+  line-height: var(--line-height);
+}
+
+/* source mode */
+.markdown-source-view {
+  font-family: var(--font-text);
+}
+
+/* live preview */
+.markdown-source-view.is-live-preview {
+  font-family: var(--font-editor-theme);
+}
+
+/* reading mode */
+.markdown-preview-view {
+  font-family: var(--font-text-theme);
+}
+
+/* !! MARKDOWN FORMATTING */
+/* fade formatting tags out */
+.shrink-formatting .CodeMirror-line span.cm-formatting:not(.cm-s-obsidian span.cm-link, .cm-s-obsidian span.cm-hmd-internal-link, .cm-s-obsidian span.cm-url, .cm-s-obsidian span.cm-attribute, .cm-s-obsidian span.cm-quote, span.cm-hashtag.cm-hashtag-begin, .cm-s-obsidian span.cm-formatting-list), /* legacy editor */
+.shrink-formatting .markdown-source-view.mod-cm6 .cm-line span.cm-formatting:not(.cm-s-obsidian span.cm-link, .cm-s-obsidian span.cm-hmd-internal-link, .cm-s-obsidian span.cm-url, .cm-s-obsidian span.cm-attribute, .cm-s-obsidian span.cm-quote, span.cm-hashtag.cm-hashtag-begin, .cm-s-obsidian span.cm-formatting-list) /* CM6 editor */ {
+  color: var(--text-faint);
+  font-size: var(--font-smaller) !important;
+}
+
+/* increase blockquote height */
+.markdown-source-view.mod-cm6.is-live-preview .HyperMD-quote {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+/* !! HIGHLIGHT ACTIVE LINE */
+.active-line-highlight .markdown-source-view .CodeMirror-activeline,
+.active-line-highlight .markdown-source-view.mod-cm6 .cm-active.cm-line {
+  background: var(--background-secondary);
+  border-radius: 8px;
+}
+
+/* !! NUMBERED LISTS IN CALLOUTS */
+.markdown-preview-view .callout ol,
+.markdown-source-view.mod-cm6 .callout ol{
+  padding-inline-start: 0.5em; /* prova 2.0–2.6em */
+}
+
+/* !! SIDEBAR NOTES */
+/* make sidebar notes' background var(--background-primary) */
+.mod-right-split .markdown-preview-view,
+.mod-left-split .markdown-preview-view,
+.mod-right-split .markdown-source-view.mod-cm6 .cm-scroller,
+.mod-left-split .markdown-source-view.mod-cm6 .cm-scroller {
+  background-color: var(--background-primary);
+}
+/* }}} */
+
+/* +++ UI ELEMENTS {{{ */
+
+/* make inline title equal to H1 */
+.inline-title {
+  font-weight: var(--h1-weight);
+}
+
+/* increase space between editor and metadata – credit to Minimal */
+.metadata-container {
+  --input-height: 2rem;
+}
+.markdown-source-view .metadata-container {
+  transform: translateX(-4px);
+}
+.is-phone {
+  --metadata-label-font-size: var(--font-adaptive-smaller);
+  --metadata-input-font-size: var(--font-adaptive-smaller);
+}
+
+/* make cursor accent color */
+.CodeMirror-cursor {
+  background-color: var(--color-accent);
+}
+
+/* make Vim cursor transluscent and accent color */
+.cm-fat-cursor-mark,
+.cm-fat-cursor .CodeMirror-cursor {
+  width: inherit;
+  background-color: var(--vim-cursor) !important;
+}
+
+/* blur background when pop-ups are active 
+   (credit: Deep Work) */
+body .modal {
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+body .modal .prompt-results {
+  padding: calc((1rem * 2) * 1);
+}
+body .modal-bg {
+  /* backdrop-filter: blur(8px); */ /* causes slowdowns */
+  background-color: rgb(8, 8, 8);
+}
+
+/* make workspace frameless */
+.workspace-tab-header-container,
+.workspace-ribbon.mod-left:before,
+.mod-macos.is-hidden-frameless:not(.is-popout-window)
+  .sidebar-toggle-button.mod-right {
+  background-color: var(--background-primary);
+}
+
+/* remove note-to-note link underline */
+:root body {
+  --link-decoration: none;
+  --link-decoration-hover: none;
+}
+
+/* centered tables, simplified */
+.markdown-rendered {
+	table {
+		width: 100%;
+		th {
+			padding: calc(1em/3) calc(2em/3);
+		}
+		td {
+			padding: calc(1em/6) calc(2em/3);
+		}
+	}
+}
+
+.markdown-source-view .cm-content .cm-table-widget {
+	.table-wrapper {
+		width: 100%;
+		th .table-cell-wrapper {
+			padding: calc(1em/3) calc(2em/3);
+		}
+		td .table-cell-wrapper {
+			padding: calc(1em/6) calc(2em/3);
+		}
+	}
+}
+
+/* h1 and surrounding p margin variables, thanks to FireIsGood#0733 */
+:root h1 {
+  margin: 0;
+}
+.markdown-preview-view div:has(> h1) + div > p {
+  margin-top: 1em;
+}
+.markdown-preview-view div:has(+ div > h1) > p {
+  margin-bottom: 0.33em;
+}
+
+/* FIX: margin-top funkiness present since Obsidian 1.1+ */
+.markdown-source-view table {
+  margin-top: 0;
+}
+
+/* FIX: background color for titlebar buttons on Windows */
+div.titlebar-button-container.mod-right {
+  background-color: var(--background-primary) !important;
+}
+
+/* EDITOR: font-scalable edit-block-button */
+/* add header padding for button if last column is right-aligned */
+.markdown-source-view table th:last-child[align="right"] {
+  padding-right: 2.767527675276753em;
+  padding-left: 0.8324108241082411em; /* balances padding-right */
+}
+/* button attributes */
+.markdown-source-view.mod-cm6 .edit-block-button {
+  opacity: 1;
+  top: 0.3em;
+  right: 0.25em;
+  align-items: center;
+  justify-content: center;
+}
+.markdown-source-view div.edit-block-button svg {
+  width: 1.2em;
+  height: 1em;
+}
+
+/* !! DARKEN GRAPH VIEW LINS */
+.graph-view.color-line {
+  color: var(--graph-line-color);
+}
+
+/* !! FOLD INDICATOR SPACING */
+/* prevent overlap with text */
+
+div.cm-fold-indicator {
+  margin-right: 0;
+}
+
+.markdown-source-view.mod-cm6 .cm-fold-indicator .collapse-indicator {
+  padding-right: 4px;
+  right: 0;
+}
+
+/* !! CUSTOM CHECKBOX ICONS (adapted from Minimal by @kepano) {{{ */
+input[data-task=">"]:checked,
+input[data-task="!"]:checked,
+input[data-task="-"]:checked,
+input[data-task="<"]:checked,
+input[data-task=l]:checked,
+input[data-task="*"]:checked,
+input[data-task=I]:checked,
+input[data-task=p]:checked,
+input[data-task=P]:checked,
+input[data-task=f]:checked,
+input[data-task=l]:checked,
+input[data-task=L]:checked,
+input[data-task=k]:checked,
+input[data-task=u]:checked,
+input[data-task=w]:checked,
+input[data-task=c]:checked,
+input[data-task=C]:checked,
+input[data-task=d]:checked,
+input[data-task=b]:checked,
+input[data-task="+"]:checked,
+li[data-task=">"] > input:checked,
+li[data-task="!"] > input:checked,
+li[data-task="-"] > input:checked,
+li[data-task="<"] > input:checked,
+li[data-task=l] > input:checked,
+li[data-task="*"] > input:checked,
+li[data-task=I] > input:checked,
+li[data-task=l] > input:checked,
+li[data-task=L] > input:checked,
+li[data-task=p] > input:checked,
+li[data-task=P] > input:checked,
+li[data-task=f] > input:checked,
+li[data-task=k] > input:checked,
+li[data-task=u] > input:checked,
+li[data-task=d] > input:checked,
+li[data-task=w] > input:checked,
+li[data-task=c] > input:checked,
+li[data-task=C] > input:checked,
+li[data-task=b] > input:checked,
+li[data-task="+"] > input:checked,
+li[data-task=">"] > p > input:checked,
+li[data-task="!"] > p > input:checked,
+li[data-task="-"] > p > input:checked,
+li[data-task="<"] > p > input:checked,
+li[data-task=l] > p > input:checked,
+li[data-task=L] > p > input:checked,
+li[data-task="*"] > p > input:checked,
+li[data-task=I] > p > input:checked,
+li[data-task=p] > p > input:checked,
+li[data-task=P] > p > input:checked,
+li[data-task=f] > p > input:checked,
+li[data-task=k] > p > input:checked,
+li[data-task=u] > p > input:checked,
+li[data-task=d] > p > input:checked,
+li[data-task=w] > p > input:checked,
+li[data-task=c] > p > input:checked,
+li[data-task=C] > p > input:checked,
+li[data-task="+"] > p > input:checked,
+li[data-task=b] > p > input:checked {
+  --checkbox-marker-color: transparent;
+  border: none;
+  border-radius: 0;
+  background-image: none;
+  background-color: currentColor;
+  -webkit-mask-size: var(--checkbox-icon);
+  -webkit-mask-position: 50% 50%;
+}
+
+/* [>] Forwarded */
+input[data-task=">"]:checked,
+li[data-task=">"] > input:checked,
+li[data-task=">"] > p > input:checked {
+  color: var(--text-faint);
+  transform: rotate(90deg);
+  -webkit-mask-position: 50% 100%;
+  -webkit-mask-image: url("data:,");
+}
+
+/* [<] Schedule */
+input[data-task="<"]:checked,
+li[data-task="<"] > input:checked,
+li[data-task="<"] > p > input:checked {
+  color: var(--text-faint);
+  -webkit-mask-image: url("data:,");
+}
+
+/* [?] Question */
+input[data-task="?"]:checked,
+li[data-task="?"] > input:checked,
+li[data-task="?"] > p > input:checked {
+  --checkbox-marker-color: transparent;
+  background-color: var(--color-yellow);
+  border-color: var(--color-yellow);
+  background-position: 50% 50%;
+  background-size: 200% 90%;
+  background-image: url('data:,');
+}
+.theme-dark input[data-task="?"]:checked,
+.theme-dark li[data-task="?"] > input:checked,
+.theme-dark li[data-task="?"] > p > input:checked {
+  background-image: url('data:,');
+}
+
+/* [/] Incomplete */
+input[data-task="/"]:checked,
+li[data-task="/"] > input:checked,
+li[data-task="/"] > p > input:checked {
+  background-image: none;
+  background-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+input[data-task="/"]:checked:after,
+li[data-task="/"] > input:checked:after,
+li[data-task="/"] > p > input:checked:after {
+  top: 0;
+  left: 0;
+  content: " ";
+  display: block;
+  position: absolute;
+  background-color: var(--background-modifier-accent);
+  width: calc(50% - 0.5px);
+  height: 100%;
+  -webkit-mask-image: none;
+}
+
+/* [!] Important */
+input[data-task="!"]:checked,
+li[data-task="!"] > input:checked,
+li[data-task="!"] > p > input:checked {
+  color: var(--color-orange);
+  -webkit-mask-image: url("data:,");
+}
+
+/* ["] Quote */
+input[data-task=“]:checked,
+li[data-task=“] > input:checked,
+li[data-task=“] > p > input:checked,
+input[data-task=Q]:checked,
+li[data-task=Q] > input:checked,
+li[data-task=Q] > p > input:checked,
+input[data-task='"']:checked,
+li[data-task='"'] > input:checked,
+li[data-task='"'] > p > input:checked {
+  --checkbox-marker-color: transparent;
+  background-position: 50% 50%;
+  background-color: var(--color-cyan);
+  border-color: var(--color-cyan);
+  background-size: 75%;
+  background-repeat: no-repeat;
+  background-image: url('data:,');
+}
+.theme-dark input[data-task=“]:checked,
+.theme-dark li[data-task=“] > input:checked,
+.theme-dark li[data-task=“] > p > input:checked,
+.theme-dark input[data-task='"']:checked,
+.theme-dark li[data-task='"'] > input:checked,
+.theme-dark li[data-task='"'] > p > input:checked {
+  background-image: url('data:,');
+}
+
+/* [-] Canceled */
+input[data-task="-"]:checked,
+li[data-task="-"] > input:checked,
+li[data-task="-"] > p > input:checked {
+  color: var(--text-faint);
+  -webkit-mask-image: url("data:,");
+}
+
+body:not(.tasks) .markdown-source-view.mod-cm6 .HyperMD-task-line[data-task]:is([data-task="-"]),
+body:not(.tasks) .markdown-preview-view ul li[data-task="-"].task-list-item.is-checked,
+body:not(.tasks) li[data-task="-"].task-list-item.is-checked {
+  color: var(--text-faint);
+  text-decoration: line-through solid var(--text-faint) 1px;
+}
+
+/* [*] Star */
+input[data-task="*"]:checked,
+li[data-task="*"] > input:checked,
+li[data-task="*"] > p > input:checked {
+  color: var(--color-yellow);
+  -webkit-mask-image: url("data:,");
+}
+
+/* [l] Location */
+input[data-task=l]:checked,
+li[data-task=l] > input:checked,
+li[data-task=l] > p > input:checked,
+input[data-task=L]:checked,
+li[data-task=L] > input:checked,
+li[data-task=L] > p > input:checked {
+  color: var(--color-red);
+  -webkit-mask-image: url("data:,");
+}
+
+/* [i] Info */
+input[data-task=i]:checked,
+li[data-task=i] > input:checked,
+li[data-task=i] > p > input:checked {
+  --checkbox-marker-color: transparent;
+  background-color: var(--color-blue);
+  border-color: var(--color-blue);
+  background-position: 50%;
+  background-size: 100%;
+  background-image: url('data:,');
+}
+.theme-dark input[data-task=i]:checked,
+.theme-dark li[data-task=i] > input:checked,
+.theme-dark li[data-task=i] > p > input:checked {
+  background-image: url('data:,');
+}
+
+/* [S] Amount/savings/money */
+input[data-task=S]:checked,
+li[data-task=S] > input:checked,
+li[data-task=S] > p > input:checked {
+  --checkbox-marker-color: transparent;
+  border-color: var(--color-green);
+  background-color: var(--color-green);
+  background-size: 100%;
+  background-image: url('data:,');
+}
+.theme-dark input[data-task=S]:checked,
+.theme-dark li[data-task=S] > input:checked,
+.theme-dark li[data-task=S] > p > input:checked {
+  background-image: url('data:,');
+}
+
+/* [I] Idea/lightbulb */
+input[data-task=I]:checked,
+li[data-task=I] > input:checked,
+li[data-task=I] > p > input:checked {
+  color: var(--color-yellow);
+  -webkit-mask-image: url("data:,");
+}
+
+/* [f] Fire */
+input[data-task=f]:checked,
+li[data-task=f] > input:checked,
+li[data-task=f] > p > input:checked {
+  color: var(--color-red);
+  -webkit-mask-image: url("data:,");
+}
+
+/* [k] Key */
+input[data-task=k]:checked,
+li[data-task=k] > input:checked,
+li[data-task=k] > p > input:checked {
+  color: var(--color-yellow);
+  -webkit-mask-image: url("data:,");
+}
+
+/* [u] Up */
+input[data-task=u]:checked,
+li[data-task=u] > input:checked,
+li[data-task=u] > p > input:checked {
+  color: var(--color-green);
+  -webkit-mask-image: url("data:,");
+}
+
+/* [w] Win */
+input[data-task=w]:checked,
+li[data-task=w] > input:checked,
+li[data-task=w] > p > input:checked {
+  color: var(--color-purple);
+  -webkit-mask-image: url("data:,");
+}
+
+/* [d], [D] Doing */
+input[data-task=d]:checked,
+li[data-task=d] > input:checked,
+li[data-task=d] > p > input:checked,
+input[data-task=D]:checked,
+li[data-task=D] > input:checked,
+li[data-task=D] > p > input:checked {
+  color: var(--color-purple);
+  -webkit-mask-image: url('data:,');
+  padding-bottom: 10px;
+}
+/* [p] Pros */
+input[data-task=p]:checked,
+li[data-task=p] > input:checked,
+li[data-task=p] > p > input:checked,
+input[data-task=P]:checked,
+li[data-task=P] > input:checked,
+li[data-task=P] > p > input:checked {
+  color: var(--color-green);
+  -webkit-mask-image: url("data:,");
+}
+
+/* [c] Cons */
+input[data-task=c]:checked,
+li[data-task=c] > input:checked,
+li[data-task=c] > p > input:checked,
+input[data-task=C]:checked,
+li[data-task=C] > input:checked,
+li[data-task=C] > p > input:checked {
+  color: var(--color-orange);
+  -webkit-mask-image: url("data:,");
+}
+
+/* [b] Bookmark */
+input[data-task=b]:checked,
+li[data-task=b] > input:checked,
+li[data-task=b] > p > input:checked {
+  color: var(--color-orange);
+  -webkit-mask-image: url("data:,");
+}
+
+/* [+] Add */
+input[data-task="+"]:checked,
+li[data-task="+"] > input:checked,
+li[data-task="+"] > p > input:checked {
+  color: var(--color-red);
+  -webkit-mask-image: url('data:,');
+}
+
+/* /1* [B] Brainstorm ~~WIP *1/ */
+/* input[data-task=B]:checked, */
+/* li[data-task=B] > input:checked, */
+/* li[data-task=B] > p > input:checked { */
+/*   color: var(--color-pink); */
+/*   -webkit-mask-image: url('data:,'); */
+/* } */
+
+/* }}} */
+
+/* +++ PLUGINS {{{ */
+
+/* ZOOM by @vslinko */
+.zoom-plugin-header {
+  font-family: var(--font-interface-theme);
+}
+
+/* KANBAN by @mgmeyers */
+.kanban-plugin__grow-wrap > textarea {
+  background-color: var(--background-primary);
+}
+
+/* OBSIDIAN TODO by @larslockefeer */
+div.todo-item-view-item span.due-date {
+  background-color: var(--yellow);
+  color: white; /* makes due dates legible */
+}
+
+div.todo-item-view-item span.due-date.overdue {
+  background-color: var(--orange);
+}
+
+/* make toolbar items more legible */
+div.todo-item-view-item-link svg,
+div.todo-item-view-toolbar-item svg {
+  fill: var(--text-faint);
+}
+/* make focused toolbar item follow the theme accent */
+div.todo-item-view-toolbar-item.active svg {
+  fill: var(--text-accent);
+}
+
+/* +++ STYLE SETTINGS by @mgmeyers */
+
+/* @settings
+
+name: Typewriter
+id: obsidian-typewriter
+settings:
+    -
+        id: typewriter-editor
+        title: Editor
+        type: heading
+        level: 1
+    -
+        id: shrink-formatting
+        title: Shrink & fade Markdown formatting symbols
+        type: class-toggle
+        default: on
+    -
+        id: active-line-highlight
+        title: Highlight the active line
+        type: class-toggle
+        default: on
+*/
+/* }}} */
+
+/* +++ OBSIDIAN HUB {{{ */
+/* @plugins
+core:
+- audio-recorder
+- backlink
+- command-palette
+- daily-notes
+- file-explorer
+- global-search
+- graph
+- note-composer
+- open-with-default-app
+- outgoing-links
+- outline
+- page-preview
+- random-note
+- slash-commands
+- switcher
+- tag-pane
+- templates
+- word-count
+- workspaces
+- zk-prefixer
+
+community:
+- calendar
+- obsidian-kanban
+- sliding-panes-obsidian
+- tag-wrangler
+- cm-typewriter-scroll-obsidian
+- better-word-count
+- obsidian-day-planner
+- workbench-obsidian
+- obsidian-citation-plugin
+- obsidian-journey-plugin
+- obsidian-banners
+- obsidian-dataview
+- obsidian-style-settings
+- obsidian-plugin-todo
+*/
+/* }}} */

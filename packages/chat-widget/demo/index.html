@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>nr-chat — демо</title>
+  <style>
+    body { margin: 0; font: 14px system-ui, sans-serif; background: #f4f4f6; color: #222; }
+    header { display: flex; gap: 8px; align-items: center; padding: 10px 16px; }
+    header h1 { font-size: 16px; margin: 0 12px 0 0; }
+    .tab { border: 1px solid #ccc; background: #fff; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+    .tab[aria-selected="true"] { background: #2f6fed; color: #fff; border-color: #2f6fed; }
+    main { padding: 0 16px 16px; height: calc(100vh - 70px); box-sizing: border-box; }
+    nr-chat { height: 100%; }
+    .pane[hidden] { display: none; }
+    .pane { height: 100%; }
+    small { color: #666; }
+  </style>
+  <script type="module" src="../dist/nr-chat.js"></script>
+</head>
+<body>
+  <header>
+    <h1>&lt;nr-chat&gt;</h1>
+    <button class="tab" data-tab="nr" aria-selected="true">nr (HTTP)</button>
+    <button class="tab" data-tab="acp" aria-selected="false">ACP (WebSocket)</button>
+    <small id="where"></small>
+  </header>
+  <main>
+    <div class="pane" id="pane-nr"></div>
+    <div class="pane" id="pane-acp" hidden></div>
+  </main>
+  <script type="module">
+    // Параметры: ?nr=<url бэкенда>&acp=<ws url>&auth=<ключ>&profile=<профиль>&cwd=<каталог сессии>&lang=ru|en
+    const q = new URLSearchParams(location.search)
+    const nr = q.get('nr') ?? 'http://127.0.0.1:7800/api'
+    const acp = q.get('acp') ?? 'ws://127.0.0.1:7811/acp'
+    const common = { auth: q.get('auth') ?? undefined, lang: q.get('lang') ?? undefined, cwd: q.get('cwd') ?? undefined }
+    document.getElementById('where').textContent = `nr: ${nr} · acp: ${acp}`
+    const made = {}
+    function make(kind) {
+      if (made[kind]) return
+      const el = document.createElement('nr-chat')
+      el.id = `chat-${kind}`
+      el.setAttribute('transport', kind)
+      el.setAttribute('backend', kind === 'nr' ? nr : acp)
+      // profile= (пусто) — без профиля: дефолт бэкенда.
+      const profile = q.has('profile') ? q.get('profile') : 'agent'
+      if (profile) el.setAttribute('profile', profile)
+      for (const [k, v] of Object.entries(common)) if (v) el.setAttribute(k, v)
+      document.getElementById(`pane-${kind}`).append(el)
+      made[kind] = el
+    }
+    function show(kind) {
+      for (const b of document.querySelectorAll('.tab')) b.setAttribute('aria-selected', String(b.dataset.tab === kind))
+      document.getElementById('pane-nr').hidden = kind !== 'nr'
+      document.getElementById('pane-acp').hidden = kind !== 'acp'
+      make(kind)
+    }
+    for (const b of document.querySelectorAll('.tab')) b.addEventListener('click', () => show(b.dataset.tab))
+    show(q.get('tab') ?? 'nr')
+  </script>
+</body>
+</html>

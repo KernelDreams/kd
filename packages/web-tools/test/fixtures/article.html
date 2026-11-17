@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Why Result Types Beat Exceptions &mdash; Example Blog</title>
+  <style>body { font-family: serif } .ad { display: block }</style>
+  <script>window.dataLayer = [{ event: 'pageview' }]</script>
+</head>
+<body>
+  <header class="site-header"><a href="/">Example Blog</a></header>
+  <nav><ul><li><a href="/">Home</a></li><li><a href="/archive">Archive</a></li></ul></nav>
+  <div class="layout">
+    <article>
+      <h1>Why Result Types Beat Exceptions</h1>
+      <p class="byline">Posted on <time datetime="2026-09-01">1 Sep 2026</time></p>
+      <p>Exceptions are <em>invisible</em> in a function&#39;s signature. A <code>Result</code> makes the failure path part of the <strong>type</strong>.</p>
+      <p>Consider the classic&nbsp;example:</p>
+      <pre><code>function parse(s: string): Result&lt;number&gt; {
+  const n = Number(s)
+  return Number.isNaN(n) ? err(new Error('NaN')) : ok(n)
+}</code></pre>
+      <h2>Trade-offs</h2>
+      <ul>
+        <li>Explicit error handling</li>
+        <li>More verbose call sites</li>
+      </ul>
+      <!-- tracking pixel below -->
+      <p>Version 2 of the library shipped in 2026 &amp; fixed 14 bugs.</p>
+    </article>
+    <aside><h3>Related posts</h3><a href="/x">Something unrelated</a></aside>
+  </div>
+  <footer>&copy; 2026 Example Blog. All rights reserved.</footer>
+  <script src="/analytics.js"></script>
+</body>
+</html>

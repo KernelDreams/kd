@@ -1,0 +1,46 @@
+/*
+ * Скин `parchment` — light по умолчанию (макет 2c, значения дословно).
+ * Тёмная половина скина — ember (макет 1b «тёмный близнец» 2a): по спеке
+ * parchment — дефолт для light, ember — дефолт для dark, поэтому дефолтный
+ * скин несёт оба набора и переключение режима само даёт нужную пару.
+ */
+
+[data-skin='parchment'][data-mode='light'] {
+  --nr-bg: #f6efe3;
+  --nr-surface: #efe6d8;
+  --nr-raised: #fffaf0;
+  --nr-fg: #1f1a14;
+  --nr-muted: rgb(31 26 20 / 0.7);
+  --nr-line: #ddd0bb;
+  --nr-accent: #985518;
+  --nr-ok: #5f6c33;
+  --nr-error: #a8452c;
+
+  --nr-accent-fg: #fffaf0;
+  --nr-line-soft: #e3d7c4;
+  --nr-shadow-pop: 0 8px 26px rgb(31 26 20 / 0.1);
+
+  --nr-font-ui: 'Spline Sans', system-ui, -apple-system, sans-serif;
+  --nr-font-body: 'Spline Sans', system-ui, -apple-system, sans-serif;
+  --nr-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+[data-skin='parchment'][data-mode='dark'] {
+  --nr-bg: #171310;
+  --nr-surface: #1a1613;
+  --nr-raised: #1c1713;
+  --nr-fg: #efe6da;
+  --nr-muted: rgb(239 230 218 / 0.72);
+  --nr-line: #2a231d;
+  --nr-accent: #e0a458;
+  --nr-ok: #8fa055;
+  --nr-error: #c56849;
+
+  --nr-accent-fg: #171310;
+  --nr-line-soft: #241e19;
+  --nr-shadow-pop: 0 8px 26px rgb(0 0 0 / 0.5);
+
+  --nr-font-ui: 'Public Sans', system-ui, -apple-system, sans-serif;
+  --nr-font-body: 'Public Sans', system-ui, -apple-system, sans-serif;
+  --nr-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}

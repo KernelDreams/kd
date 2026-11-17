@@ -1,0 +1,10 @@
+%meta {who: 'лента'}
+Документ с собственным хендлером: ни `$type`, ни `$run` — исполняется тело
+ноды `%handler`.
+
+%handler main {nr: {lang: 'ts'}}
+```ts
+export default async function (ctx, meta) {
+  return { output: 'handler: ' + ctx.get(['who']) + ' / ' + (meta.program ? 'program есть' : 'program нет') }
+}
+```

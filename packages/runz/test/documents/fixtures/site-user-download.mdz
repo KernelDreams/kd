@@ -1,0 +1,123 @@
+$run: download
+
+# site-user-download — выкачивает каталог пользователя Site в TOON.
+#
+# Usage:
+#   runz site-user-download.mdz                          public-каталог $user (ниже)
+#   runz site-user-download.mdz --user=SomeUser          любой юзер (public — работает для чужих)
+#   runz site-user-download.mdz --visibility=private     свой приватный архив (только свой аккаунт)
+#   runz site-user-download.mdz --visibility=unlisted    свои unlisted
+#   runz site-user-download.mdz --visibility=all --out=./dump   всё в одну папку (архив)
+#
+# Раскладка (visibility != all):
+#   <out>/<user>/<visibility>/projects.toon   — каталог этого уровня видимости
+#   <out>/<user>/<visibility>/<slug>.toon     — полное определение каждого проекта
+#   <out>/<user>/user.toon                     — профиль (bio + статистика) как есть
+# visibility=all → всё валится в <out>/<user>/ напрямую (свалка для архивации).
+#
+# Уровни видимости (visibility):
+#   public   — витрина: is_public && !is_unlisted (в листинге, видно всем). Дефолт.
+#   unlisted — is_unlisted (по прямой ссылке, не в листинге).
+#   private  — !is_public && !is_unlisted (только владельцу; в основном форки-архив).
+#   all      — всё скопом, в одну папку (для архивации).
+# Типы проектов (characters/presets/lorebooks) НЕ разделяются — все падают как <slug>.toon.
+# По умолчанию public: единственный уровень, доступный для ЛЮБОГО аккаунта,
+# поэтому тулза ведёт себя единообразно и для своего, и для чужого профиля.
+
+$user: Some_User
+$out: ./site/bots
+$visibility: public
+$adapter: site/default
+$profiles: ./profiles
+
+## $action download
+```ts
+import { loadAdapter, asJson } from '@kerneldreams/web'
+import { encode } from '@toon-format/toon'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+export default async function (ctx, meta, helpers) {
+  const user = (helpers.attr('user') || '').trim()
+  const outRoot = (helpers.attr('out') || './site/bots').trim()
+  const visibility = (helpers.attr('visibility') || 'public').trim().toLowerCase()
+  if (!user) return { output: 'no --user given', exitCode: 1 }
+  if (!['public', 'unlisted', 'private', 'all'].includes(visibility)) {
+    return { output: 'bad --visibility (public|unlisted|private|all): ' + visibility, exitCode: 1 }
+  }
+
+  const ad = await loadAdapter(helpers.attr('adapter') || 'site/default', [helpers.attr('profiles') || './profiles'])
+  if (!ad.ok) return { output: 'loadAdapter FAIL: ' + ad.error.message, exitCode: 1 }
+  const adapter = ad.value
+
+  // ── 1. Профиль + весь каталог одним запросом ─────────────────────────────
+  const res = await adapter.deliver({ method: 'GET', url: 'https://api.example.com/api/users/' + encodeURIComponent(user) + '?full=true' })
+  if (!res.ok) return { output: 'user deliver FAIL: ' + res.error.message, exitCode: 1 }
+  const j = asJson(res.value)
+  if (!j.ok) return { output: 'user not-json (status ' + res.value.status + ')', exitCode: 1 }
+  const profile = j.value
+  const allNodes = profile?.projects?.nodes ?? []
+  if (!Array.isArray(allNodes)) return { output: 'no projects.nodes in response', exitCode: 1 }
+
+  // ── 2. Папки: user.toon всегда в корне <out>/<user>/ ─────────────────────
+  const userDir = join(outRoot, user)
+  mkdirSync(userDir, { recursive: true })
+  writeFileSync(join(userDir, 'user.toon'), encode(profile), 'utf8')
+
+  // visibility=all → свалка в userDir; иначе — подпапка по уровню
+  const targetDir = visibility === 'all' ? userDir : join(userDir, visibility)
+  mkdirSync(targetDir, { recursive: true })
+
+  // ── 3. Фильтр по видимости ───────────────────────────────────────────────
+  const pass = (n) => {
+    if (visibility === 'all') return true
+    // public = витрина: в листинге, видно всем. is_unlisted снимает из листинга.
+    if (visibility === 'public') return n.is_public === true && n.is_unlisted !== true
+    // unlisted = не в листинге (по ссылке); is_public при этом может быть любым.
+    if (visibility === 'unlisted') return n.is_unlisted === true
+    // private = не публичный и не unlisted (только владельцу).
+    return n.is_public === false && n.is_unlisted !== true
+  }
+  const nodes = allNodes.filter(pass)
+
+  // типы для отчёта
+  const byType = {}
+  for (const n of nodes) byType[n.projectSpace] = (byType[n.projectSpace] || 0) + 1
+
+  writeFileSync(join(targetDir, 'projects.toon'), encode(nodes), 'utf8')
+  helpers.log('user=' + user + ' visibility=' + visibility + ' | catalog total=' + allNodes.length + ' selected=' + nodes.length + ' ' + JSON.stringify(byType))
+
+  // ── 4. Полное определение каждого проекта ────────────────────────────────
+  // Эндпоинт: api/<path>?full=true. Персонаж — fullPath без префикса, нужен characters/.
+  // Пресет/лорбук — fullPath уже с префиксом (presets/, lorebooks/), берётся как есть.
+  const canonPath = (n) => {
+    const fp = n.fullPath ?? n.full_path
+    return n.projectSpace === 'characters' ? 'characters/' + fp : fp
+  }
+
+  let okCount = 0, failCount = 0
+  for (const n of nodes) {
+    const fp = n.fullPath ?? n.full_path
+    if (!fp) { failCount++; continue }
+    const slug = String(fp).split('/').pop()
+    const url = 'https://api.example.com/api/' + canonPath(n) + '?full=true'
+    const r = await adapter.deliver({ method: 'GET', url })
+    if (!r.ok) { helpers.log('FAIL ' + slug + ': ' + r.error.message); failCount++; continue }
+    const jj = asJson(r.value)
+    if (!jj.ok) { helpers.log('FAIL ' + slug + ': not-json (status ' + r.value.status + ')'); failCount++; continue }
+    const node = jj.value?.node ?? jj.value
+    writeFileSync(join(targetDir, slug + '.toon'), encode(node), 'utf8')
+    okCount++
+    if (okCount % 25 === 0) helpers.log('  fetched ' + okCount + '/' + nodes.length)
+  }
+
+  return {
+    output: 'done: ' + user + ' / ' + visibility
+      + '\n  dir: ' + targetDir
+      + '\n  catalog: total ' + allNodes.length + ', selected ' + nodes.length + ' ' + JSON.stringify(byType)
+      + '\n  fetched: ' + okCount + ' ok, ' + failCount + ' failed'
+      + '\n  profile: user.toon',
+    exitCode: failCount > 0 ? 1 : 0,
+  }
+}
+```

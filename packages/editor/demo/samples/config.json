@@ -1,0 +1,8 @@
+{
+  "name": "nr-editor-demo",
+  "modes": ["md", "mdz", "mdd", "mds", "ts", "tsx", "json", "yaml", "css", "html"],
+  "theme": "auto",
+  "typescript": false,
+  "limits": { "maxFileSize": 1048576, "lazy": true },
+  "owner": null
+}

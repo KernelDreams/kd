@@ -1,0 +1,17 @@
+/* Тестовая страница <ObjectEditor>: токены, скин оболочки, скин листа, Tailwind-мост. */
+@import 'tailwindcss';
+@import './theme/tokens.css';
+@import './theme/shell.css';
+@import './theme/sheet-parchment.skin.css';
+@import './theme/tailwind.css';
+@source '../src';
+@source '.';
+
+html,
+body {
+  margin: 0;
+  background: var(--nr-bg);
+  color: var(--nr-fg);
+  font-family: var(--nr-font-ui);
+  -webkit-font-smoothing: antialiased;
+}

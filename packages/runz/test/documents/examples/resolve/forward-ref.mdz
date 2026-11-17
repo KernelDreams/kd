@@ -1,0 +1,22 @@
+$run: trace
+
+Зонд: ссылка ВПЕРЁД. `label` объявлен ДО `registry`, но ссылается на него.
+
+Порядок звеньев декларативен: звено видит только объявленные выше. Ссылка вниз —
+громкая ошибка с именем звена, а не тихий undefined и не случайный симптом
+(«ресурс не найден: ./bots/${registry.active}.md») где-то дальше.
+
+## $source label
+$nr: {type: 'inline', parse: 'mdz'}
+$text: активен ${registry.active}
+
+## $source registry
+$nr: {type: 'file', parse: 'mdd'}
+$path: ./bots/registry.md
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  return { output: 'сюда не доходит: ' + String(ctx.get(['label', 'text'])) }
+}
+```

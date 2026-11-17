@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.claude/
+.code/
+.nrd-fn-*
+scripts/migrate/import-report.json
+__pycache__/
+*.pyc

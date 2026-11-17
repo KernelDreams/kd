@@ -1,0 +1,248 @@
+$editor: 1
+$id: ccv3
+$title: Карточка бота CCv3
+
+## $section main
+$title: Основное
+
+### $field kind
+$path: data.extensions.nrchat.kind
+$type: string
+$label: Тип
+$enum: $[bot, persona]
+$widget: select
+$props: {labels: {bot: "Бот", persona: "Персона"}}
+
+### $field name
+$row: r1
+$path: data.name
+$type: string
+$label: Имя
+$required: true
+
+### $field nickname
+$row: r1
+$path: data.nickname
+$type: string
+$label: Никнейм
+
+### $field description
+$path: data.description
+$type: string
+$label: Описание
+$widget: textarea
+$props: {rows: 4}
+
+### $field personality
+$path: data.personality
+$type: string
+$label: Личность
+$widget: textarea
+$props: {rows: 3}
+
+### $field scenario
+$path: data.scenario
+$type: string
+$label: Сценарий
+$widget: textarea
+$props: {rows: 3}
+
+## $section dialogue
+$title: Диалог
+$show-if: {"data.extensions.nrchat.kind": ["bot"]}
+
+### $field first_mes
+$path: data.first_mes
+$type: string
+$label: Первое сообщение
+$widget: textarea
+$props: {rows: 6}
+
+### $field alternate_greetings
+$path: data.alternate_greetings
+$type: string[]
+$label: Альтернативные гритинги
+$widget: ccv3.greetings
+
+### $field group_only_greetings
+$path: data.group_only_greetings
+$type: string[]
+$label: Гритинги для групп
+$widget: ccv3.greetings
+
+### $field mes_example
+$path: data.mes_example
+$type: string
+$label: Примеры диалога
+$widget: textarea
+$props: {rows: 6}
+
+## $section instructions
+$title: Инструкции
+
+### $field system_prompt
+$path: data.system_prompt
+$type: string
+$label: Системный промпт
+$widget: textarea
+$props: {rows: 4}
+
+### $field post_history_instructions
+$path: data.post_history_instructions
+$type: string
+$label: Инструкции после истории
+$widget: textarea
+$props: {rows: 3}
+
+### $field creator_notes
+$path: data.creator_notes
+$type: string
+$label: Заметки автора
+$widget: markdown
+
+## $section meta
+$title: Метаданные
+
+### $field creator
+$row: r2
+$path: data.creator
+$type: string
+$label: Автор
+
+### $field character_version
+$row: r2
+$path: data.character_version
+$type: string
+$label: Версия
+
+### $field tags
+$path: data.tags
+$type: string[]
+$label: Теги
+$widget: tags
+
+### $field spec
+$row: r3
+$type: string
+$label: Спецификация
+$default: chara_card_v3
+$required: true
+
+### $field spec_version
+$row: r3
+$type: string
+$label: Версия спецификации
+$default: "3.0"
+$required: true
+
+## $section book
+$title: Лорбук
+
+### $field book_name
+$row: r4
+$path: data.character_book.name
+$type: string
+$label: Название книги
+
+### $field scan_depth
+$row: r4
+$path: data.character_book.scan_depth
+$type: integer
+$label: Глубина сканирования
+$widget: number
+$min: 0
+
+### $field token_budget
+$row: r5
+$path: data.character_book.token_budget
+$type: integer
+$label: Бюджет токенов
+$widget: number
+$min: 0
+
+### $field recursive_scanning
+$row: r5
+$path: data.character_book.recursive_scanning
+$type: boolean
+$label: Рекурсивное сканирование
+$widget: checkbox
+
+### $repeat entries
+$path: data.character_book.entries
+$label: Записи
+$item-title: name
+
+#### $field name
+$type: string
+$label: Название
+
+#### $field keys
+$type: string[]
+$label: Ключи
+$widget: ccv3.lorebook-keys
+
+#### $field content
+$type: string
+$label: Содержимое
+$widget: textarea
+$props: {rows: 4}
+
+#### $field enabled
+$type: boolean
+$label: Включена
+$widget: checkbox
+
+#### $field insertion_order
+$type: integer
+$label: Порядок вставки
+$widget: number
+
+#### $field case_sensitive
+$type: boolean
+$label: С учётом регистра
+$widget: checkbox
+
+#### $field priority
+$type: integer
+$label: Приоритет
+$widget: number
+
+#### $field comment
+$type: string
+$label: Комментарий
+$widget: textarea
+$props: {rows: 2}
+
+## $section assets
+$title: Ассеты
+
+### $repeat assets
+$path: data.assets
+$label: Ассеты
+$item-title: name
+
+#### $field type
+$type: string
+$label: Тип
+
+#### $field uri
+$type: string
+$label: Файл
+$widget: image
+
+#### $field name
+$type: string
+$label: Название
+
+#### $field ext
+$type: string
+$label: Расширение
+
+## $section extensions
+$title: Расширения
+
+### $field extensions
+$path: data.extensions
+$type: object
+$label: Расширения как есть
+$widget: json

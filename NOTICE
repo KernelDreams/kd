@@ -1,0 +1,73 @@
+KernelDreams kd
+Copyright (c) 2026 Denys Vynohradskyi. MIT License (see LICENSE).
+
+This repository includes code adapted from third-party projects. Their notices
+follow; each package that carries such code also ships its own NOTICE.
+
+================================================================================
+@kerneldreams/nrd/json5 — derived from JSON5
+================================================================================
+
+The JSON5 reader in `packages/nrd/src/json5/json5.ts` is a port of JSON5 (https://github.com/json5/json5),
+used under the following terms. The test fixtures in `packages/nrd/test/json5/json5-suite/` are a
+verbatim copy of https://github.com/json5/json5-tests, under the same terms; see
+`packages/nrd/test/json5/json5-suite/LICENSE.md`.
+
+MIT License
+
+Copyright (c) 2012-2018 Aseem Kishore, and [others].
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+[others]: https://github.com/json5/json5/contributors
+
+================================================================================
+@kerneldreams/tools — OpenClaw, pi-mono
+================================================================================
+
+
+This package includes code adapted from the following MIT-licensed projects:
+
+- OpenClaw (src/agents)
+  Copyright (c) OpenClaw Foundation
+  https://github.com/openclaw/openclaw — MIT License
+
+  - src/fs/edit-diff.ts, edit-replacements.ts, file-diff.ts — vendored
+    from src/agents/sessions/tools/ (commit 071246fb, 2026-10-02): fuzzy edit
+    matching with replacement on original offsets, line-ending preservation,
+    diff receipts. Small helpers (line endings, levenshtein, utf16 slice) in
+    src/fs/edit-support.ts.
+  - src/fs/apply-patch.ts — hunk location tiers after
+    src/agents/apply-patch-update.ts (unified diff instead of the Codex format).
+  - src/exec/, src/node/processes.ts — exec/process shape (yieldMs → background
+    → poll/kill) after src/agents/bash-tools*.ts and bash-process-registry.ts.
+
+- pi-mono (packages/coding-agent), Copyright (c) Mario Zechner
+  https://github.com/badlogic/pi-mono — MIT License
+  Ported from pi coding-agent (packages/coding-agent/src/core/tools/, via the
+  pi-nrchat fork): read, ls, find, grep tools (schemas, limits, output format),
+  truncate.ts and path-utils.ts (src/fs/read.ts, search.ts, truncate.ts,
+  paths.ts).
+
+================================================================================
+Test fixtures
+================================================================================
+
+Theme fixtures in packages/skins/test/fixtures (Catppuccin and others) are test
+data by third-party authors; their licenses are stated in the files themselves.

@@ -1,0 +1,306 @@
+$editor: 1
+$id: fate-condensed
+$title: Fate Condensed
+
+## $section character
+$title: Персонаж
+
+### $field portrait
+$row: r1
+$type: string
+$label: Портрет
+$widget: image
+$props: {aspect: "2:3"}
+
+### $field name
+$row: r1
+$type: string
+$label: Имя
+$required: true
+
+### $field description
+$type: string
+$label: Описание
+$widget: textarea
+$props: {rows: 4}
+
+### $field refresh
+$row: r2
+$type: integer
+$label: Восстановление
+$widget: number
+$min: 0
+$default: 3
+$props: {min: 0}
+
+### $field fatePoints
+$row: r2
+$type: integer
+$label: Жетоны судьбы
+$widget: number
+$min: 0
+$default: 3
+$props: {min: 0}
+
+## $section aspects
+$title: Аспекты
+
+### $field highConcept
+$type: string
+$label: Концепция
+$widget: fate.aspect
+$props: {kind: "high-concept"}
+
+### $field trouble
+$type: string
+$label: Проблема
+$widget: fate.aspect
+$props: {kind: "trouble"}
+
+### $repeat aspects
+$label: Другие аспекты
+$item-title: text
+
+#### $field text
+$type: string
+$label: Аспект
+$widget: fate.aspect
+$props: {kind: "other"}
+
+## $section skills
+$title: Навыки
+
+### $field academics
+$path: skills.academics
+$type: integer
+$label: Academics
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field athletics
+$path: skills.athletics
+$type: integer
+$label: Athletics
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field burglary
+$path: skills.burglary
+$type: integer
+$label: Burglary
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field contacts
+$path: skills.contacts
+$type: integer
+$label: Contacts
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field crafts
+$path: skills.crafts
+$type: integer
+$label: Crafts
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field deceive
+$path: skills.deceive
+$type: integer
+$label: Deceive
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field drive
+$path: skills.drive
+$type: integer
+$label: Drive
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field empathy
+$path: skills.empathy
+$type: integer
+$label: Empathy
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field fight
+$path: skills.fight
+$type: integer
+$label: Fight
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field investigate
+$path: skills.investigate
+$type: integer
+$label: Investigate
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field lore
+$path: skills.lore
+$type: integer
+$label: Lore
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field notice
+$path: skills.notice
+$type: integer
+$label: Notice
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field physique
+$path: skills.physique
+$type: integer
+$label: Physique
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field provoke
+$path: skills.provoke
+$type: integer
+$label: Provoke
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field rapport
+$path: skills.rapport
+$type: integer
+$label: Rapport
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field resources
+$path: skills.resources
+$type: integer
+$label: Resources
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field shoot
+$path: skills.shoot
+$type: integer
+$label: Shoot
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field stealth
+$path: skills.stealth
+$type: integer
+$label: Stealth
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+### $field will
+$path: skills.will
+$type: integer
+$label: Will
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+## $section stunts
+$title: Трюки
+
+### $repeat stunts
+$item-title: name
+
+#### $field name
+$type: string
+$label: Название
+
+#### $field description
+$type: string
+$label: Описание
+$widget: textarea
+$props: {rows: 3}
+
+## $section stress
+$title: Стресс и последствия
+
+### $computed physicalBoxes
+$label: Ячеек физического
+$expr: "<< 3 + (1 if skills.physique >= 1 else 0) + (1 if skills.physique >= 3 else 0) >>"
+$type: number
+
+### $computed mentalBoxes
+$label: Ячеек ментального
+$expr: "<< 3 + (1 if skills.will >= 1 else 0) + (1 if skills.will >= 3 else 0) >>"
+$type: number
+
+### $field physical
+$path: stress.physical
+$type: boolean[]
+$label: Физический
+$widget: fate.stress-track
+$props: {boxes: "=physicalBoxes"}
+
+### $field mental
+$path: stress.mental
+$type: boolean[]
+$label: Ментальный
+$widget: fate.stress-track
+$props: {boxes: "=mentalBoxes"}
+
+### $field mild
+$path: consequences.mild
+$type: string
+$label: Лёгкое
+$widget: fate.consequence
+$props: {severity: "mild", value: 2}
+
+### $field moderate
+$path: consequences.moderate
+$type: string
+$label: Среднее
+$widget: fate.consequence
+$props: {severity: "moderate", value: 4}
+
+### $field severe
+$path: consequences.severe
+$type: string
+$label: Тяжёлое
+$widget: fate.consequence
+$props: {severity: "severe", value: 6}

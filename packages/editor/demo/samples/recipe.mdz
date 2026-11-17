@@ -1,0 +1,69 @@
+$title: Bot Fix
+$model: ${models.default}
+$tags: $[rp, fix, "two words"]
+$empty: $[]
+$retries: 3
+$ratio: -0.75
+$strict: true
+$fallback: null
+$version: +42
+$code: 007
+$quoted: "в кавычках"
+$cfg: {model: 'gpt', n: 2, nested: {deep: true}}
+$literal: \{not json}
+$nr-type: recipe
+$nr-cache: false
+$a.b: dotted key, one key
+$// top-level comment: everything here is ignored
+
+# $recipe bot-fix
+
+Intro paragraph with **bold**, a [link](https://example.com) and a placeholder ${user.name}.
+Nested placeholder ${a.${b}.c} and a call ${fn(a, b)} inline. Escaped: \${not.a.placeholder}, \$notsigil, \[x\], a\,b.
+Template macro {{user}} is not a placeholder.
+
+## $step load
+$src: $[[cards/base.mdz#Persona]]
+$nr-type: file
+$into: ${self.vars}
+
+Loads the base card. Include inline too: $[[snippets/greeting.mdz]] and a section $[[#Rules]].
+
+### $param depth
+$value: 4
+$min: 1
+$// depth of the insertion
+
+### $param mode d2
+$value: "strict"
+
+## $@
+
+## $step save
+$dst: out/${self.name}.md
+$cfg: {retries: 2, strict: true}
+$on-error: $[retry, log]
+
+Body of a block is regular **markdown** — live preview works:
+
+- one
+- two
+
+```js
+// three-backtick fence: plain markdown code, $not: attribute
+const x = `${y}`
+```
+
+## $
+
+## $site.ru publish
+$nr-target: site
+$visibility: public
+
+### Rules
+
+Plain markdown heading inside a block — not a block, but it is a section.
+
+## $$ invalid heading — not a block
+
+@other: sigil, just text in mdz

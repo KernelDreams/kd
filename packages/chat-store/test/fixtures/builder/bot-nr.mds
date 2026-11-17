@@ -1,0 +1,62 @@
+Бот типа `nr` (bot-assembly-spec §3, §4.2): сорта полей по местам.
+Текст до первого %-узла — комментарий. Агент (пресет) остаётся обёрткой: его
+промпт — `agent.pre`/`agent.post`. Каскад шаблона: шаблон экземпляра бота
+(`extensions.nrchat.template`) → этот (тип) → агент → встроенный.
+
+Справочник (`bot.reference`) — наверху, стабильно; примеры блоком (`bot.examples`)
+— там же (ходами — перед гритингом, со сроком, вытесняются первыми); состояние
+гритинга — сообщением перед гритингом (уезжает вглубь), копия со сроком — в хвосте
+(`bot.state_tail`). Форма (`form`: поле формы + заметка формы) и переменные формы
+(`vars.tail`) — в хвосте; правила бота (`bot.rules`, как PHI) — потом; жёсткие
+переменные (`vars.last`) — последними.
+
+%system
+<{ if turn.impersonate }>
+<< player.system_prompt | default(agent.impersonate_pre) >>
+<< lore.before >>
+<< bot.reference | label(char, '\n') >>
+<< lore.after >>
+<< persona >>
+<{ else }>
+<< lore.before >>
+<< agent.pre | card >>
+<< base >>
+<< vars.top >>
+<{ if group.split }>
+<< group.top >>
+<{ else }>
+<< bot.reference | label(char, '\n') >>
+<{ endif }>
+<< bot.examples | label('Example dialogue:', '\n') >>
+<< lore.after >>
+<< persona >>
+<< cast >>
+<{ endif }>
+
+<{ history }>
+<{ if not turn.impersonate }>
+<{ inject at=meta.depthPrompt.depth role=meta.depthPrompt.role source='depth_prompt' }><< meta.depthPrompt.prompt >><{ endinject }>
+<{ for e in lore.depth }><{ inject at=e.depth role=e.role source=e.source reason=e.reason }><< e.content >><{ endinject }><{ endfor }>
+<{ for e in lore.sticky }><{ inject after=e.after role=e.role send=e.send merge=e.merge source=e.source reason=e.reason }><< e.content >><{ endinject }><{ endfor }>
+<{ for e in lore.once }><{ inject after=e.after role=e.role send=e.send merge=e.merge source=e.source reason=e.reason }><< e.content >><{ endinject }><{ endfor }>
+<{ for e in editor.notes }><{ inject after=e.after role=e.role send=e.send source=e.source reason=e.reason }><< e.content >><{ endinject }><{ endfor }>
+<{ for e in notes.depth }><{ inject at=e.depth role=e.role source=e.source }><< e.content >><{ endinject }><{ endfor }>
+<{ endif }>
+<{ endhistory }>
+
+%user
+<{ if not turn.impersonate }>
+<< group.tail >>
+<< bot.state_tail >>
+<< notes.tail >>
+<< form >>
+<< vars.tail >>
+<< agent.post | post >>
+<< bot.rules >>
+<< vars.last >>
+<{ endif }>
+<{ impersonate }>
+<{ if turn.impersonate }>
+<< vars.tail >>
+<< vars.last >>
+<{ endif }>

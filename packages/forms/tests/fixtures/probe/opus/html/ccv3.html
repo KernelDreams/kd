@@ -1,0 +1,125 @@
+<nr-editor id="ccv3" title="Карточка бота CCv3">
+  <script type="application/schema+json">
+  {"type":"object","required":["spec","spec_version","data"],"properties":{
+    "spec":{"type":"string","default":"chara_card_v3","title":"Spec"},
+    "spec_version":{"type":"string","default":"3.0","title":"Версия спеки"},
+    "data":{"type":"object","required":["name"],"properties":{
+      "name":{"type":"string","title":"Имя"},
+      "nickname":{"type":"string","title":"Прозвище"},
+      "description":{"type":"string","title":"Описание"},
+      "personality":{"type":"string","title":"Характер"},
+      "scenario":{"type":"string","title":"Сценарий"},
+      "first_mes":{"type":"string","title":"Первое сообщение"},
+      "mes_example":{"type":"string","title":"Примеры диалога"},
+      "alternate_greetings":{"type":"array","title":"Альтернативные гритинги","items":{"type":"string"}},
+      "group_only_greetings":{"type":"array","title":"Гритинги для группы","items":{"type":"string"}},
+      "system_prompt":{"type":"string","title":"Системный промпт"},
+      "post_history_instructions":{"type":"string","title":"Инструкции после истории"},
+      "creator_notes":{"type":"string","title":"Заметки автора"},
+      "creator":{"type":"string","title":"Автор"},
+      "character_version":{"type":"string","title":"Версия персонажа"},
+      "tags":{"type":"array","title":"Теги","items":{"type":"string"}},
+      "extensions":{"type":"object","title":"Расширения","properties":{
+        "nrchat":{"type":"object","properties":{
+          "kind":{"type":"string","enum":["bot","persona"],"default":"bot","title":"Вид"}}}}},
+      "character_book":{"type":"object","title":"Лорбук","properties":{
+        "name":{"type":"string","title":"Название"},
+        "scan_depth":{"type":"integer","minimum":0,"title":"Глубина сканирования"},
+        "token_budget":{"type":"integer","minimum":0,"title":"Бюджет токенов"},
+        "recursive_scanning":{"type":"boolean","default":false,"title":"Рекурсивное сканирование"},
+        "entries":{"type":"array","title":"Записи","items":{"type":"object","properties":{
+          "keys":{"type":"array","title":"Ключи","items":{"type":"string"}},
+          "content":{"type":"string","title":"Содержание"},
+          "enabled":{"type":"boolean","default":true,"title":"Включена"},
+          "insertion_order":{"type":"integer","default":100,"title":"Порядок вставки"},
+          "case_sensitive":{"type":"boolean","default":false,"title":"Учитывать регистр"},
+          "name":{"type":"string","title":"Имя записи"},
+          "priority":{"type":"integer","default":10,"title":"Приоритет"},
+          "comment":{"type":"string","title":"Комментарий"}}}}}},
+      "assets":{"type":"array","title":"Ассеты","items":{"type":"object","properties":{
+        "type":{"type":"string","title":"Тип"},
+        "uri":{"type":"string","title":"URI"},
+        "name":{"type":"string","title":"Имя"},
+        "ext":{"type":"string","title":"Расширение"}}}}}}}}
+  </script>
+  <style>
+    .panel { border: 1px solid var(--nr-line); border-radius: var(--nr-radius); padding: var(--nr-space-4); }
+    .entry { border-left: 2px solid var(--nr-accent); padding-left: var(--nr-space-2); }
+  </style>
+
+  <section data-section="card" data-title="Карточка" class="panel">
+    <div data-row>
+      <label>Spec <input data-path="spec"></label>
+      <label>Версия спеки <input data-path="spec_version"></label>
+      <nr-widget data-path="data.extensions.nrchat.kind" data-widget="select" data-label="Вид" data-props='{"labels":{"bot":"Бот","persona":"Персона"}}'></nr-widget>
+    </div>
+    <div data-row>
+      <label>Имя <input data-path="data.name"></label>
+      <label>Прозвище <input data-path="data.nickname"></label>
+    </div>
+    <div data-row>
+      <label>Автор <input data-path="data.creator"></label>
+      <label>Версия персонажа <input data-path="data.character_version"></label>
+    </div>
+    <nr-widget data-path="data.tags" data-widget="tags" data-label="Теги"></nr-widget>
+  </section>
+
+  <section data-section="character" data-title="Персонаж" class="panel">
+    <label>Описание <textarea data-path="data.description" data-props='{"rows":8}'></textarea></label>
+    <label>Характер <textarea data-path="data.personality" data-props='{"rows":4}'></textarea></label>
+    <label>Сценарий <textarea data-path="data.scenario" data-props='{"rows":4}'></textarea></label>
+  </section>
+
+  <section data-section="dialogue" data-title="Диалог" class="panel" data-show-if='{"data.extensions.nrchat.kind":["bot"]}'>
+    <label>Первое сообщение <textarea data-path="data.first_mes" data-props='{"rows":6}'></textarea></label>
+    <nr-widget data-path="data.alternate_greetings" data-widget="ccv3.greetings" data-label="Альтернативные гритинги"></nr-widget>
+    <nr-widget data-path="data.group_only_greetings" data-widget="ccv3.greetings" data-label="Гритинги для группы"></nr-widget>
+    <label>Примеры диалога <textarea data-path="data.mes_example" data-props='{"rows":6}'></textarea></label>
+  </section>
+
+  <section data-section="prompts" data-title="Промпты" class="panel" data-collapsed>
+    <label>Системный промпт <textarea data-path="data.system_prompt" data-props='{"rows":4}'></textarea></label>
+    <label>Инструкции после истории <textarea data-path="data.post_history_instructions" data-props='{"rows":4}'></textarea></label>
+    <label>Заметки автора <textarea data-path="data.creator_notes" data-props='{"rows":4}'></textarea></label>
+  </section>
+
+  <section data-section="lorebook" data-title="Лорбук" class="panel" data-collapsed>
+    <div data-row>
+      <label>Название <input data-path="data.character_book.name"></label>
+      <label>Глубина сканирования <input data-path="data.character_book.scan_depth"></label>
+      <label>Бюджет токенов <input data-path="data.character_book.token_budget"></label>
+      <label><input data-path="data.character_book.recursive_scanning"> Рекурсивное сканирование</label>
+    </div>
+    <div data-repeat="data.character_book.entries" data-item-title="name" data-label="Записи" class="entry">
+      <div data-row>
+        <label>Имя записи <input data-path="name"></label>
+        <label><input data-path="enabled"> Включена</label>
+        <label><input data-path="case_sensitive"> Учитывать регистр</label>
+      </div>
+      <nr-widget data-path="keys" data-widget="ccv3.lorebook-keys" data-label="Ключи"></nr-widget>
+      <label>Содержание <textarea data-path="content" data-props='{"rows":5}'></textarea></label>
+      <div data-row>
+        <label>Порядок вставки <input data-path="insertion_order"></label>
+        <label>Приоритет <input data-path="priority"></label>
+      </div>
+      <label>Комментарий <input data-path="comment"></label>
+    </div>
+  </section>
+
+  <section data-section="assets" data-title="Ассеты" class="panel" data-collapsed>
+    <div data-repeat="data.assets" data-item-title="name" data-label="Ассеты">
+      <div data-row>
+        <nr-widget data-path="uri" data-widget="image" data-label="URI"></nr-widget>
+        <div>
+          <label>Тип <input data-path="type"></label>
+          <label>Имя <input data-path="name"></label>
+          <label>Расширение <input data-path="ext"></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-section="extensions" data-title="Расширения" class="panel" data-collapsed>
+    <nr-widget data-path="data.extensions" data-widget="json" data-label="extensions (как есть)"></nr-widget>
+  </section>
+</nr-editor>

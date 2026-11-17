@@ -1,0 +1,7 @@
+# nr-pty: вход bash как логин-шелла (профили пользователя), потом метки OSC 133.
+[ -f /etc/profile ] && . /etc/profile
+if [ -f ~/.bash_profile ]; then . ~/.bash_profile
+elif [ -f ~/.bash_login ]; then . ~/.bash_login
+elif [ -f ~/.profile ]; then . ~/.profile
+fi
+. "$NR_PTY_SHELL_DIR/osc133.bash"

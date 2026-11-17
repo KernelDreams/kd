@@ -1,0 +1,49 @@
+{
+  "name": "@kerneldreams/host-agent",
+  "version": "0.1.0",
+  "description": "Remote host file agent: over ssh without installation or embedded in an installed agent; one zero-dependency script, JSON lines for stat/list/read/write/copy/trash/search/watch/thumb/exec.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/host-agent"
+  },
+  "keywords": [
+    "ssh",
+    "remote-files",
+    "file-manager",
+    "zero-dependency"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    },
+    "./agent.cjs": "./agent.cjs",
+    "./embed": {
+      "types": "./embed.d.ts",
+      "import": "./embed.js",
+      "default": "./embed.js"
+    }
+  },
+  "files": [
+    "agent.cjs",
+    "index.js",
+    "index.d.ts",
+    "embed.js",
+    "embed.d.ts",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

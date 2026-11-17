@@ -1,0 +1,3 @@
+$model: gemma-4-12b
+$think: true
+$temp: 0.7

@@ -1,0 +1,25 @@
+$run: trace
+
+Зонд: композиция разных форматов в одном звене через функции.
+
+## $source bot
+$nr: {type: 'inline', parse: 'mdz'}
+
+$[[./parts/personality.md]]
+$preset: ${loadJSON('./parts/preset.json')}
+$lore: ${loadMDD('./parts/lore.md')}
+## $@
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  return { output: [
+    'bot.name              : ' + String(ctx.get(['bot', 'name'])),
+    'typeof bot.preset     : ' + typeof ctx.get(['bot','preset']),
+    'isContext(bot.preset) : ' + String(!!(ctx.get(['bot','preset']) && ctx.get(['bot','preset']).get)),
+    'bot.preset.temperature: ' + String(ctx.get(['bot', 'preset', 'temperature'])),
+    'bot.preset.style      : ' + String(ctx.get(['bot', 'preset', 'style'])),
+    'bot.lore.city         : ' + String(ctx.get(['bot', 'lore', 'city'])),
+  ].join('\n') }
+}
+```

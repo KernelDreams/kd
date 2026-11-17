@@ -1,0 +1,33 @@
+$title: блокнот
+
+# Блокнот: шаги исполняются в порядке документа.
+#
+# `## $step` — `fn` с автозапуском (словарь имён). Результат шага кладётся в
+# цепочку под его id и виден следующим шагам как `${<id>}`.
+
+## $source cfg
+$nr-type: inline
+
+$greeting: привет
+
+## $step one
+```ts
+export default async (ctx) => ({ output: 'шаг 1: ' + ctx.get(['greeting']) })
+```
+
+## $shell hello
+```sh
+echo из-шелла
+```
+
+## $step two
+```ts
+export default async (ctx) => ({
+  output: 'шаг 2 видит: ' + String(ctx.get(['one', 'output'])),
+})
+```
+
+## $fn manual
+```ts
+export default async () => ({ output: 'вручную' })
+```

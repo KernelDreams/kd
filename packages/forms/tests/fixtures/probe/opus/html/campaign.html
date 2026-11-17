@@ -1,0 +1,69 @@
+<nr-editor id="campaign" title="Журнал кампании">
+  <script type="application/schema+json">
+  {"type":"object","required":["title"],"properties":{
+    "title":{"type":"string","title":"Название"},
+    "system":{"type":"string","enum":["fate","dnd5e","other"],"default":"fate","title":"Система"},
+    "started":{"type":"string","title":"Начало"},
+    "sessions":{"type":"array","title":"Сессии","items":{"type":"object","properties":{
+      "title":{"type":"string","title":"Название"},
+      "date":{"type":"string","title":"Дата"},
+      "summary":{"type":"string","title":"Итоги"},
+      "scenes":{"type":"array","title":"Сцены","items":{"type":"object","properties":{
+        "title":{"type":"string","title":"Название"},
+        "kind":{"type":"string","enum":["combat","social","explore"],"title":"Тип"},
+        "notes":{"type":"string","title":"Заметки"},
+        "npcs":{"type":"array","title":"НПС","items":{"type":"string"}},
+        "initiative":{"type":"array","title":"Инициатива","items":{"type":"object","properties":{
+          "name":{"type":"string","title":"Имя"},
+          "roll":{"type":"integer","title":"Бросок"}}}},
+        "clues":{"type":"array","title":"Улики","items":{"type":"object","properties":{
+          "text":{"type":"string","title":"Улика"},
+          "found":{"type":"boolean","default":false,"title":"Найдена"}}}}}}}}}}}}
+  </script>
+  <style>
+    .panel { border: 1px solid var(--nr-line); border-radius: var(--nr-radius); padding: var(--nr-space-4); }
+    .nested { border-left: 2px solid var(--nr-accent); padding-left: var(--nr-space-2); margin-top: var(--nr-space-2); }
+  </style>
+
+  <section data-section="campaign" data-title="Кампания" class="panel">
+    <div data-row>
+      <label>Название <input data-path="title"></label>
+      <nr-widget data-path="system" data-widget="select" data-label="Система" data-props='{"labels":{"fate":"Fate","dnd5e":"D&amp;D 5e","other":"Другая"}}'></nr-widget>
+      <nr-widget data-path="started" data-widget="date" data-label="Начало"></nr-widget>
+    </div>
+  </section>
+
+  <section data-section="sessions" data-title="Сессии" class="panel">
+    <div data-repeat="sessions" data-item-title="title" data-label="Сессии">
+      <div data-row>
+        <label>Название <input data-path="title"></label>
+        <nr-widget data-path="date" data-widget="date" data-label="Дата"></nr-widget>
+        <output data-computed="foundClues" data-type="number" data-label="Найдено улик"><< item.scenes | default([]) | pluck("clues") | flatten | selectattr("found") | length >></output>
+      </div>
+      <nr-widget data-path="summary" data-widget="markdown" data-label="Итоги"></nr-widget>
+
+      <div data-repeat="scenes" data-item-title="title" data-label="Сцены" class="nested">
+        <div data-row>
+          <label>Название <input data-path="title"></label>
+          <nr-widget data-path="kind" data-widget="select" data-label="Тип" data-props='{"labels":{"combat":"Бой","social":"Общение","explore":"Исследование"}}'></nr-widget>
+        </div>
+        <label>Заметки <textarea data-path="notes" data-props='{"rows":4}'></textarea></label>
+        <nr-widget data-path="npcs" data-widget="tags" data-label="НПС"></nr-widget>
+
+        <div data-repeat="initiative" data-item-title="name" data-label="Инициатива" class="nested" data-show-if='{"kind":["combat"]}'>
+          <div data-row>
+            <label>Имя <input data-path="name"></label>
+            <label>Бросок <input data-path="roll"></label>
+          </div>
+        </div>
+
+        <div data-repeat="clues" data-item-title="text" data-label="Улики" class="nested">
+          <div data-row>
+            <label>Улика <input data-path="text"></label>
+            <label><input data-path="found"> Найдена</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</nr-editor>

@@ -1,0 +1,123 @@
+{
+  "name": "@kerneldreams/chat-store",
+  "version": "0.1.0",
+  "description": "Neutral chat-session model, SessionStore contract, driver registry and storage drivers; zero-dependency core with model types, tree math and message anatomy for storage and wire.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/chat-store"
+  },
+  "keywords": [
+    "chat",
+    "session",
+    "session-store",
+    "conversation-tree",
+    "branching",
+    "swipes",
+    "message",
+    "part",
+    "llm",
+    "jsonl",
+    "nr-chat",
+    "mds",
+    "claude",
+    "zero-dependency"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./nr-chat": {
+      "types": "./dist/nr-chat/index.d.ts",
+      "import": "./dist/nr-chat/index.js"
+    },
+    "./pi": {
+      "types": "./dist/pi/index.d.ts",
+      "import": "./dist/pi/index.js"
+    },
+    "./migrate": {
+      "types": "./dist/migrate.d.ts",
+      "import": "./dist/migrate.js"
+    },
+    "./claude": {
+      "types": "./dist/claude/index.d.ts",
+      "import": "./dist/claude/index.js"
+    },
+    "./memory": {
+      "types": "./dist/memory/index.d.ts",
+      "import": "./dist/memory/index.js"
+    },
+    "./assembly": {
+      "types": "./dist/assembly/index.d.ts",
+      "import": "./dist/assembly/index.js"
+    },
+    "./cards": {
+      "types": "./dist/cards/index.d.ts",
+      "import": "./dist/cards/index.js"
+    },
+    "./lore-files": {
+      "types": "./dist/lore-files.d.ts",
+      "import": "./dist/lore-files.js"
+    },
+    "./fs": {
+      "types": "./dist/fs/index.d.ts",
+      "import": "./dist/fs/index.js"
+    },
+    "./node-fs": {
+      "types": "./dist/fs/node.d.ts",
+      "import": "./dist/fs/node.js"
+    },
+    "./lore": {
+      "types": "./dist/lore.d.ts",
+      "import": "./dist/lore.js"
+    },
+    "./builder": {
+      "types": "./dist/builder/index.d.ts",
+      "import": "./dist/builder/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "node -e \"const p=require('./package.json');const bad=Object.entries({...p.dependencies,...p.peerDependencies}).filter(([,v])=>String(v).startsWith('file:'));if(bad.length){console.error('publish blocked: file: deps '+bad.map(([k])=>k).join(', '));process.exit(1)}\""
+  },
+  "dependencies": {
+    "@kerneldreams/nrd": "0.1.0"
+  },
+  "peerDependencies": {
+    "nunjucks": "^3.2.4"
+  },
+  "peerDependenciesMeta": {
+    "@kerneldreams/nrd/chat": {
+      "optional": true
+    },
+    "@kerneldreams/nrd": {
+      "optional": true
+    },
+    "nunjucks": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "@types/nunjucks": "^3.2.6",
+    "nunjucks": "^3.2.4",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

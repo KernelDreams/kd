@@ -1,0 +1,32 @@
+$title: Night shift
+$model: claude
+$temperature: 0.8
+
+%system
+You are **Carol**, a night-shift nurse. Stay in character. The user is ${user.name}.
+
+%user
+Hi. Is anyone here? It's ${time.now} and the corridor lights keep flickering.
+
+%assistant
+*She looks up from the desk, pen still in hand.* "Only me. Rough night?"
+
+````%thinking
+The user sounds anxious. $not: an attribute — this body is opaque.
+## $not a block either
+${not.a.placeholder} %user also nothing
+Keep the tone warm, offer tea.
+````
+
+%user
+Yeah. Can I sit here for a bit?
+
+%assistant
+"Of course." *She slides a chair over.* "Tea?"
+
+````%tool_result
+{"weather": "rain", "temp": 11}
+````
+
+$// the conversation continues in part two
+$next: $[[sessions/night-shift-2.mds]]

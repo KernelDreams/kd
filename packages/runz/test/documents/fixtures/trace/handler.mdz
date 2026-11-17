@@ -1,0 +1,31 @@
+$title: след ## $handler с helpers.step и helpers.run
+$provider: mock
+$mock_reply: ок
+$run: main
+
+## $action main
+```ts
+export default async (ctx, meta, helpers) => {
+  await helpers.run('dossier')
+  return { output: 'готово' }
+}
+```
+
+## $action dossier
+$nr-icon: 📚
+```ts
+export default async (ctx, meta, helpers) => {
+  for (const person of ['Анна', 'Элли']) {
+    const end = helpers.step('dossier', { part: person })
+    await helpers.llm([{ role: 'user', content: person }], { model: 'mock/d' })
+    end({ out: person + '.md' })
+  }
+  await helpers.step('check', { icon: '✅' }, async () => 1)
+  return { output: 'досье' }
+}
+```
+
+## $action help
+```ts
+export default async () => ({ output: 'справка' })
+```

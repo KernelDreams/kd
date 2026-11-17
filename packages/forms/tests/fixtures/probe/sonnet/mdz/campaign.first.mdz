@@ -1,0 +1,106 @@
+$editor: 1
+$id: campaign
+$title: Журнал кампании
+
+## $section campaign
+$title: Кампания
+
+### $field title
+$type: string
+$label: Название
+$required: true
+
+### $field system
+$row: r1
+$type: string
+$label: Система
+$enum: $[fate, dnd5e, other]
+$widget: select
+$props: {labels: {fate: "Fate", dnd5e: "D&D 5e", other: "Другая"}}
+
+### $field started
+$row: r1
+$type: string
+$label: Начало
+$widget: date
+
+## $section sessions
+$title: Сессии
+
+### $repeat sessions
+$label: Сессии
+$item-title: title
+
+#### $field title
+$row: r2
+$type: string
+$label: Название
+
+#### $field date
+$row: r2
+$type: string
+$label: Дата
+$widget: date
+
+#### $field summary
+$type: string
+$label: Итоги
+$widget: markdown
+
+#### $computed cluesFound
+$label: Найдено улик в сессии
+$expr: "<< item.scenes | map(attribute='clues') | flatten | selectattr('found') | length >>"
+$type: number
+
+#### $repeat scenes
+$label: Сцены
+$item-title: title
+
+##### $field title
+$row: r3
+$type: string
+$label: Название
+
+##### $field kind
+$row: r3
+$type: string
+$label: Тип
+$enum: $[combat, social, explore]
+$widget: select
+$props: {labels: {combat: "Бой", social: "Общение", explore: "Исследование"}}
+
+##### $field notes
+$type: string
+$label: Заметки
+$widget: textarea
+$props: {rows: 4}
+
+##### $field npcs
+$type: string[]
+$label: НПС
+$widget: tags
+
+##### $repeat initiative
+$label: Инициатива
+$item-title: name
+$show-if: {kind: ["combat"]}
+
+####### $field name
+$type: string
+$label: Имя
+
+####### $field roll
+$type: integer
+$label: Бросок
+
+##### $repeat clues
+$label: Улики
+$item-title: text
+
+###### $field text
+$type: string
+$label: Улика
+
+###### $field found
+$type: boolean
+$label: Найдена

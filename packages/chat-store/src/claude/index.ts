@@ -1,0 +1,387 @@
+/**
+ * claude driver (`./claude`) — minimal set: read + append (spec §7.3).
+ *
+ * Agent SDK transcripts (`~/.claude/projects`, JSONL): tree over uuid/parentUuid,
+ * records of many types (user/assistant/system + meta lines without uuid). The
+ * driver reads (list/load, broken lines → warn+skip) and appends (appendNode,
+ * forkCopy) — append-only, so untouched lines stay verbatim by construction.
+ * edit/delete/hide/swipes — capabilities false (v1): the SDK format doesn't
+ * give them cheaply.
+ *
+ * Consumers: session readers (read/archive/corpus), corpus export.
+ */
+
+import { createHash, randomUUID } from 'node:crypto'
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import type { MessageFlags, NodeInput, Part, SessionInfo, SessionModel, StoreNode } from '../model.js'
+import {
+  StoreNodeNotFound,
+  StoreSessionNotFound,
+  assertSafeId,
+  paginate,
+  partsOf,
+  type SessionStore,
+  type StoreCapabilities,
+} from '../store.js'
+import { readSidechannel, writeSidechannel } from '../fidelity.js'
+
+export interface ClaudeStoreOpts {
+  /** Transcript directory (project `~/.claude/projects/<slug>` or root). */
+  dir: string
+  /** cwd for appended records. Default — `dir`. */
+  cwd?: string
+  warn?: (message: string) => void
+}
+
+const CAPABILITIES: StoreCapabilities = {
+  edits: { edit: false, delete: false, hide: false },
+  swipes: false,
+  fork: true,
+}
+
+interface ClaudeEntry {
+  uuid?: string
+  parentUuid?: string | null
+  type?: string
+  message?: { role?: string; content?: unknown; model?: string }
+  timestamp?: string
+  isSidechain?: boolean
+  isMeta?: boolean
+  sessionId?: string
+  [k: string]: unknown
+}
+
+export function createClaudeStore(opts: ClaudeStoreOpts): SessionStore {
+  const { dir } = opts
+  const cwd = opts.cwd ?? dir
+  const warn = opts.warn ?? ((m: string) => process.stderr.write(`${m}\n`))
+
+  /** Recursive scan: session id (filename without .jsonl) → path. */
+  function scan(): Map<string, string> {
+    const found = new Map<string, string>()
+    const walk = (root: string): void => {
+      if (!existsSync(root)) return
+      for (const name of readdirSync(root)) {
+        const full = join(root, name)
+        let st
+        try {
+          st = statSync(full)
+        } catch {
+          continue
+        }
+        if (st.isDirectory()) walk(full)
+        else if (name.endsWith('.jsonl')) found.set(name.slice(0, -6), full)
+      }
+    }
+    walk(dir)
+    return found
+  }
+
+  function pathOf(id: string): string {
+    assertSafeId(id, 'session id')
+    const path = scan().get(id)
+    if (!path) throw new StoreSessionNotFound(id)
+    return path
+  }
+
+  /** File lines → records, broken ones skipped (warn). */
+  function readEntries(path: string, id: string): ClaudeEntry[] {
+    const out: ClaudeEntry[] = []
+    let bad = 0
+    for (const line of readFileSync(path, 'utf-8').split('\n')) {
+      if (line.trim() === '') continue
+      try {
+        out.push(JSON.parse(line) as ClaudeEntry)
+      } catch {
+        bad++
+      }
+    }
+    if (bad) warn(`nr-chat-store/claude: session ${id}: skipped ${bad} broken lines`)
+    return out
+  }
+
+  function toModel(entries: ClaudeEntry[], id: string): SessionModel {
+    const nodes: StoreNode[] = []
+    let createdAt: string | undefined
+    for (const entry of entries) {
+      if (typeof entry.uuid !== 'string') continue // meta lines without a tree node
+      if (createdAt === undefined && typeof entry.timestamp === 'string') createdAt = entry.timestamp
+      nodes.push(entryToNode(entry))
+    }
+    return { info: { id, createdAt, messageCount: nodes.length }, nodes }
+  }
+
+  function entryToNode(entry: ClaudeEntry): StoreNode {
+    // Fidelity sidechannel (§3): our own appends park the whole neutral node in
+    // `nrs*` fields — reconstruct verbatim. Real transcripts have none → native decode.
+    const sc = readSidechannel(entry as unknown as Record<string, unknown>)
+    if (sc) {
+      const node: StoreNode = { id: entry.uuid!, parent: entry.parentUuid ?? null, role: sc.role, parts: sc.parts }
+      if (sc.name !== undefined) node.name = sc.name
+      if (sc.flags && Object.keys(sc.flags).length) node.flags = sc.flags
+      const meta: Record<string, unknown> = { ...(sc.meta ?? {}) }
+      if (typeof entry.timestamp === 'string' && meta.createdAt === undefined) meta.createdAt = entry.timestamp
+      if (Object.keys(meta).length) node.meta = meta
+      return node
+    }
+
+    const role = entry.message?.role ?? (entry.type === 'summary' ? 'system' : entry.type ?? 'system')
+    const parts = entry.message ? decodeContent(entry.message.content) : summaryParts(entry)
+    const node: StoreNode = { id: entry.uuid!, parent: entry.parentUuid ?? null, role, parts }
+    // name round-trip (§2): appendNode parks the display name on the entry's top-level name.
+    if (typeof (entry as { name?: unknown }).name === 'string') node.name = (entry as { name: string }).name
+
+    const flags: MessageFlags = {}
+    if (entry.isMeta === true) flags.injected = true
+    if (Object.keys(flags).length) node.flags = flags
+
+    const meta: Record<string, unknown> = {}
+    if (typeof entry.timestamp === 'string') meta.createdAt = entry.timestamp
+    if (typeof entry.message?.model === 'string') meta.model = entry.message.model
+    if (entry.isSidechain === true) meta.sidechain = true
+    if (Object.keys(meta).length) node.meta = meta
+    return node
+  }
+
+  const store: SessionStore = {
+    async capabilities(): Promise<StoreCapabilities> {
+      return CAPABILITIES
+    },
+
+    async list(opts): Promise<{ sessions: SessionInfo[]; cursor?: string }> {
+      const sessions: SessionInfo[] = []
+      for (const [id, path] of scan()) {
+        try {
+          const info = toModel(readEntries(path, id), id).info
+          try {
+            info.updatedAt = new Date(statSync(path).mtimeMs).toISOString()
+          } catch {
+            /* file went away */
+          }
+          sessions.push(info)
+        } catch (err) {
+          warn(`nr-chat-store/claude: skipping ${path}: ${err instanceof Error ? err.message : String(err)}`)
+        }
+      }
+      sessions.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+      const page = paginate(sessions, opts)
+      return page.cursor !== undefined ? { sessions: page.items, cursor: page.cursor } : { sessions: page.items }
+    },
+
+    async load(id: string): Promise<SessionModel> {
+      return toModel(readEntries(pathOf(id), id), id)
+    },
+
+    async create(createOpts): Promise<SessionInfo> {
+      if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
+      const id = createOpts?.id !== undefined ? assertSafeId(createOpts.id, 'session id') : randomUUID()
+      const path = join(dir, `${id}.jsonl`)
+      if (existsSync(path)) throw new Error(`nr-chat-store/claude: session ${id} already exists`)
+      writeFileSync(path, '', 'utf-8')
+      return { id, createdAt: new Date().toISOString(), messageCount: 0 }
+    },
+
+    async appendNode(sid: string, node: NodeInput): Promise<StoreNode> {
+      const path = pathOf(sid)
+      const entries = readEntries(path, sid)
+      const lastUuid = lastNodeUuid(entries)
+      const parent = node.parent !== undefined ? node.parent : lastUuid
+
+      // id-first (§2): honor NodeInput.id verbatim (+assertSafeId, +duplicate
+      // reject); claude stops generating its own uuid when an id is given.
+      let uuid: string
+      if (node.id !== undefined) {
+        uuid = assertSafeId(node.id, 'node id')
+        if (entries.some((e) => e.uuid === uuid)) {
+          throw new Error(`nr-chat-store/claude: node id ${JSON.stringify(uuid)} already exists in session ${sid}`)
+        }
+      } else {
+        uuid = randomUUID()
+      }
+      // The claude record type is only user/assistant; the actual role (incl. 'tool',
+      // 'system') is stored in message.role so that append→load round-trips. Real
+      // transcripts carry user/assistant — they decode as before.
+      const type = node.role === 'assistant' ? 'assistant' : 'user'
+      const timestamp = new Date().toISOString()
+      const parts = partsOf(node)
+      const entry: ClaudeEntry = {
+        parentUuid: parent,
+        uuid,
+        sessionId: sid,
+        type,
+        cwd,
+        isSidechain: false,
+        userType: 'external',
+        message: { role: node.role, content: encodeContent(parts) },
+        timestamp,
+      }
+      if (node.name !== undefined) (entry as Record<string, unknown>).name = node.name
+      // Fidelity (§3): park the whole neutral node so every Part/flag/meta survives,
+      // even what the SDK transcript can't express natively. Native content above
+      // stays readable by claude tooling; the sidechannel is authoritative on read.
+      writeSidechannel(entry as unknown as Record<string, unknown>, node.role, parts, node.flags, node.meta, node.name)
+      appendFileSync(path, JSON.stringify(entry) + '\n', 'utf-8')
+      return entryToNode(entry)
+    },
+
+    async forkCopy(sid: string, atNodeId?: string): Promise<SessionInfo> {
+      const path = pathOf(sid)
+      const entries = readEntries(path, sid)
+      const byUuid = new Map<string, ClaudeEntry>()
+      for (const e of entries) if (typeof e.uuid === 'string') byUuid.set(e.uuid, e)
+
+      const leaf = atNodeId ?? lastNodeUuid(entries)
+      if (!leaf) throw new Error(`nr-chat-store/claude: session ${sid} is empty — nothing to fork`)
+      // An unknown atNodeId is a missing NODE, not a missing session (§5).
+      if (!byUuid.has(leaf)) throw new StoreNodeNotFound(leaf)
+
+      const chain: ClaudeEntry[] = []
+      for (let cur: string | null | undefined = leaf; cur; ) {
+        const e = byUuid.get(cur)
+        if (!e) break
+        chain.unshift(e)
+        cur = e.parentUuid ?? null
+      }
+
+      if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
+      const newId = randomUUID()
+      const dst = join(dir, `${newId}.jsonl`)
+      const lines = chain.map((e) => JSON.stringify({ ...e, sessionId: newId }))
+      writeFileSync(dst, lines.length ? lines.join('\n') + '\n' : '', 'utf-8')
+
+      const info: SessionInfo = {
+        id: newId,
+        createdAt: new Date().toISOString(),
+        parentSessionId: sid,
+        messageCount: chain.length,
+      }
+      if (atNodeId) info.forkMessageId = atNodeId
+      return info
+    },
+
+    async version(sid: string): Promise<string> {
+      return createHash('sha256').update(readFileSync(pathOf(sid))).digest('hex').slice(0, 16)
+    },
+  }
+
+  return store
+}
+
+// ── content ─────────────────────────────────────────────────────────────────
+
+/** Last tree node (record with uuid) — the active leaf (last line). */
+function lastNodeUuid(entries: ClaudeEntry[]): string | null {
+  for (let i = entries.length - 1; i >= 0; i--) {
+    if (typeof entries[i].uuid === 'string') return entries[i].uuid!
+  }
+  return null
+}
+
+function summaryParts(entry: ClaudeEntry): Part[] {
+  const { uuid: _u, parentUuid: _p, timestamp: _t, type, ...body } = entry
+  const part: Part = { type: 'custom', data: body, meta: { hint: `claude.${type ?? 'entry'}` } }
+  const summary = (body as { summary?: unknown }).summary
+  if (typeof summary === 'string') part.text = summary
+  return [part]
+}
+
+function decodeContent(content: unknown): Part[] {
+  if (typeof content === 'string') return content !== '' ? [{ type: 'text', text: content }] : []
+  if (!Array.isArray(content)) return []
+  const parts: Part[] = []
+  for (const raw of content) {
+    const block = raw as Record<string, unknown>
+    switch (block.type) {
+      case 'text': {
+        const text = block.text
+        if (typeof text === 'string' && text !== '') parts.push({ type: 'text', text })
+        break
+      }
+      case 'thinking': {
+        const text = block.thinking
+        if (typeof text === 'string' && text !== '') {
+          const part: Part = { type: 'thinking', text }
+          if (typeof block.signature === 'string') part.meta = { signature: block.signature }
+          parts.push(part)
+        }
+        break
+      }
+      case 'tool_use':
+        parts.push({
+          type: 'tool_use',
+          data: block.input ?? {},
+          meta: { callId: String(block.id ?? ''), name: String(block.name ?? '') },
+        })
+        break
+      case 'tool_result': {
+        const part: Part = {
+          type: 'tool_result',
+          meta: { callId: String(block.tool_use_id ?? ''), error: block.is_error === true },
+        }
+        const text = toolResultText(block.content)
+        if (text !== undefined) part.text = text
+        parts.push(part)
+        break
+      }
+      case 'image': {
+        const src = block.source as { media_type?: string; data?: string } | undefined
+        const meta: { mime?: string; url?: string } = {}
+        if (src?.media_type) meta.mime = src.media_type
+        if (src?.data) meta.url = `data:${src.media_type ?? 'application/octet-stream'};base64,${src.data}`
+        parts.push({ type: 'image', meta })
+        break
+      }
+      default:
+        parts.push({ type: 'custom', data: block, meta: { hint: `claude.block.${String(block.type)}` } })
+    }
+  }
+  return parts
+}
+
+function toolResultText(content: unknown): string | undefined {
+  if (typeof content === 'string') return content
+  if (!Array.isArray(content)) return undefined
+  const texts = content
+    .filter((b): b is { type: 'text'; text: string } => (b as { type?: string }).type === 'text')
+    .map((b) => b.text)
+  return texts.length ? texts.join('') : undefined
+}
+
+function encodeContent(parts: Part[]): unknown[] {
+  const out: unknown[] = []
+  for (const part of parts) {
+    switch (part.type) {
+      case 'text':
+        out.push({ type: 'text', text: part.text })
+        break
+      case 'thinking': {
+        const block: Record<string, unknown> = { type: 'thinking', thinking: part.text }
+        if (part.meta?.signature) block.signature = part.meta.signature
+        out.push(block)
+        break
+      }
+      case 'tool_use':
+        out.push({ type: 'tool_use', id: part.meta.callId, name: part.meta.name, input: part.data ?? {} })
+        break
+      case 'tool_result':
+        out.push({
+          type: 'tool_result',
+          tool_use_id: part.meta.callId,
+          content: part.text ?? '',
+          is_error: part.meta.error === true,
+        })
+        break
+      case 'image': {
+        const url = part.meta.url ?? ''
+        const m = /^data:([^;,]*);base64,(.*)$/s.exec(url)
+        if (m) out.push({ type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } })
+        break
+      }
+      case 'custom':
+        if (part.data && typeof part.data === 'object') out.push(part.data)
+        break
+    }
+  }
+  return out
+}

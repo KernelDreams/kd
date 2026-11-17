@@ -1,0 +1,4 @@
+#!/bin/sh
+# Страж публикации kd: в GitHub — только main / v* и только чистое дерево (scripts/guard.mjs).
+# Ставит `npm run hooks` (копия в .git/hooks). Обход — --no-verify, только владелец репы.
+exec node "$(git rev-parse --show-toplevel)/scripts/guard.mjs" --pre-push "$@"

@@ -1,0 +1,28 @@
+/* Демо-оболочка редактора: нейтральный скин «как у хозяина» — инспектор живёт в нём. */
+[data-skin='shell'][data-mode='light'] {
+  --nr-bg: #f7f7f8;
+  --nr-surface: #eeeef1;
+  --nr-raised: #ffffff;
+  --nr-fg: #1b1c20;
+  --nr-muted: rgb(27 28 32 / 0.62);
+  --nr-line: #d9dae0;
+  --nr-accent: #3b5bdb;
+  --nr-ok: #2f7d4f;
+  --nr-error: #c0392b;
+  --nr-accent-fg: #ffffff;
+  --nr-line-soft: #e4e5ea;
+}
+
+[data-skin='shell'][data-mode='dark'] {
+  --nr-bg: #16171b;
+  --nr-surface: #1d1e23;
+  --nr-raised: #22242a;
+  --nr-fg: #e8e9ee;
+  --nr-muted: rgb(232 233 238 / 0.65);
+  --nr-line: #2e3038;
+  --nr-accent: #8ca5ff;
+  --nr-ok: #6cc08b;
+  --nr-error: #ef7a6d;
+  --nr-accent-fg: #16171b;
+  --nr-line-soft: #26282f;
+}

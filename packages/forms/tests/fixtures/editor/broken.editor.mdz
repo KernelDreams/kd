@@ -1,0 +1,20 @@
+$editor: 1
+$id: fate-broken
+$title: Fate (с ошибкой)
+
+## $section character
+$title: Персонаж
+
+### $field name
+$type: string
+$label: Имя
+
+### $field refresh
+$type: integer
+$label: Восстановление
+$widget: fate.stress-track
+
+### $field description
+$type: string
+$label: Описание
+$widget: textarea

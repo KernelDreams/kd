@@ -1,0 +1,36 @@
+$run: conv
+
+# conv — утилита без LLM: JSON ⇄ TOON. Тело импортит пакет из окружения runz (`@toon-format/toon`).
+#
+# Usage:
+#   runz conv.mdz --in=<файл> --out=<файл.toon|файл.json>
+#
+# Правило: decode TOON всегда {strict:false}.
+
+$in:
+$out:
+
+## $action conv
+```ts
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
+import { extname, dirname } from 'node:path'
+import { encode, decode } from '@toon-format/toon'
+
+const KNOWN = new Set(['.json', '.toon'])
+
+export default async function (ctx: any, meta: any, helpers: any) {
+  const inPath = (helpers.attr('in') || '').trim()
+  const outPath = (helpers.attr('out') || '').trim()
+  if (!inPath) return { output: 'no --in', exitCode: 1 }
+  if (!existsSync(inPath)) return { output: 'not found: ' + inPath, exitCode: 1 }
+  if (!outPath) return { output: 'no --out', exitCode: 1 }
+  const from = extname(inPath).toLowerCase()
+  const to = extname(outPath).toLowerCase()
+  if (!KNOWN.has(from) || !KNOWN.has(to)) return { output: 'json|toon only', exitCode: 1 }
+  const text = readFileSync(inPath, 'utf8')
+  const obj = from === '.toon' ? decode(text, { strict: false }) : JSON.parse(text)
+  mkdirSync(dirname(outPath), { recursive: true })
+  writeFileSync(outPath, to === '.toon' ? encode(obj) : JSON.stringify(obj, null, 2), 'utf8')
+  return { output: inPath + ' → ' + outPath, exitCode: 0 }
+}
+```

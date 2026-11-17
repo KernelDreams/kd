@@ -1,0 +1,411 @@
+{
+  "unet": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "LoadDiffusionModel"
+    },
+    "inputs": {
+      "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "clip": {
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "LoadCLIP"
+    },
+    "inputs": {
+      "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    }
+  },
+  "vae": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "LoadVAE"
+    },
+    "inputs": {
+      "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+    }
+  },
+  "encoder": {
+    "class_type": "TextEncodeQwenImage21",
+    "_meta": {
+      "title": "Encoder"
+    },
+    "inputs": {
+      "clip": [
+        "clip",
+        0
+      ],
+      "vae": [
+        "vae",
+        0
+      ],
+      "prompt": "",
+      "negative_prompt": "",
+      "resolution": 1024,
+      "images.image_1": [
+        "ref1scale",
+        0
+      ],
+      "images.image_2": [
+        "ref2scale",
+        0
+      ],
+      "images.image_3": [
+        "ref3scale",
+        0
+      ],
+      "images.image_4": [
+        "ref4scale",
+        0
+      ],
+      "images.image_5": [
+        "ref5scale",
+        0
+      ],
+      "images.image_6": [
+        "ref6scale",
+        0
+      ],
+      "images.image_7": [
+        "ref7scale",
+        0
+      ],
+      "images.image_8": [
+        "ref8scale",
+        0
+      ],
+      "images.image_9": [
+        "ref9scale",
+        0
+      ],
+      "images.image_10": [
+        "ref10scale",
+        0
+      ]
+    }
+  },
+  "image": {
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Image"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "sampler": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sampler"
+    },
+    "inputs": {
+      "model": [
+        "unet",
+        0
+      ],
+      "positive": [
+        "encoder",
+        0
+      ],
+      "negative": [
+        "encoder",
+        1
+      ],
+      "latent_image": [
+        "image",
+        0
+      ],
+      "seed": 0,
+      "steps": 25,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1
+    }
+  },
+  "decode": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "sampler",
+        0
+      ],
+      "vae": [
+        "vae",
+        0
+      ]
+    }
+  },
+  "save": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save"
+    },
+    "inputs": {
+      "images": [
+        "decode",
+        0
+      ],
+      "filename_prefix": "qwen21"
+    }
+  },
+  "ref1": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref1"
+    },
+    "inputs": {
+      "image": "ref1.png",
+      "upload": "image"
+    }
+  },
+  "ref1scale": {
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ref1scale"
+    },
+    "inputs": {
+      "image": [
+        "ref1",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "ref2": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref2"
+    },
+    "inputs": {
+      "image": "",
+      "upload": "image"
+    }
+  },
+  "ref2scale": {
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ref2scale"
+    },
+    "inputs": {
+      "image": [
+        "ref2",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "ref3": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref3"
+    },
+    "inputs": {
+      "image": "",
+      "upload": "image"
+    }
+  },
+  "ref3scale": {
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ref3scale"
+    },
+    "inputs": {
+      "image": [
+        "ref3",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "ref4": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref4"
+    },
+    "inputs": {
+      "image": "",
+      "upload": "image"
+    }
+  },
+  "ref4scale": {
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ref4scale"
+    },
+    "inputs": {
+      "image": [
+        "ref4",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "ref5": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref5"
+    },
+    "inputs": {
+      "image": "",
+      "upload": "image"
+    }
+  },
+  "ref5scale": {
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ref5scale"
+    },
+    "inputs": {
+      "image": [
+        "ref5",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "ref6": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref6"
+    },
+    "inputs": {
+      "image": "",
+      "upload": "image"
+    }
+  },
+  "ref6scale": {
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ref6scale"
+    },
+    "inputs": {
+      "image": [
+        "ref6",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "ref7": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref7"
+    },
+    "inputs": {
+      "image": "",
+      "upload": "image"
+    }
+  },
+  "ref7scale": {
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ref7scale"
+    },
+    "inputs": {
+      "image": [
+        "ref7",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "ref8": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref8"
+    },
+    "inputs": {
+      "image": "",
+      "upload": "image"
+    }
+  },
+  "ref8scale": {
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ref8scale"
+    },
+    "inputs": {
+      "image": [
+        "ref8",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "ref9": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref9"
+    },
+    "inputs": {
+      "image": "",
+      "upload": "image"
+    }
+  },
+  "ref9scale": {
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ref9scale"
+    },
+    "inputs": {
+      "image": [
+        "ref9",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "ref10": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref10"
+    },
+    "inputs": {
+      "image": "",
+      "upload": "image"
+    }
+  },
+  "ref10scale": {
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ref10scale"
+    },
+    "inputs": {
+      "image": [
+        "ref10",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  }
+}

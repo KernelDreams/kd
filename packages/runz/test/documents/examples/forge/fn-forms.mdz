@@ -1,0 +1,24 @@
+$run: trace
+$json: ./parts/preset.json
+
+Зонд: функция как ЧТЕНИЕ ПОЛЯ vs как МОНТИРОВАНИЕ ПОДДЕРЕВА.
+Заодно: обе формы кавычек и путь-аргумент (`json` — корневой атрибут).
+
+## $source bot
+$nr: {type: 'inline', parse: 'mdz'}
+$temp: ${loadJSON('./parts/preset.json').temperature}
+$style: ${loadJSON("./parts/preset.json").style}
+$whole: ${loadJSON(json)}
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  const whole = ctx.get(['bot', 'whole'])
+  return { output: [
+    'поле .temperature : ' + String(ctx.get(['bot','temp'])),
+    'поле .style       : ' + String(ctx.get(['bot','style'])),
+    'целиком → дерево  : ' + String(!!(whole && whole.get)),
+    'из дерева .max_tokens : ' + String(ctx.get(['bot','whole','max_tokens'])),
+  ].join('\n') }
+}
+```

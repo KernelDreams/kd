@@ -1,0 +1,157 @@
+%meta {nr: {type: 'rz'}, cmd: 'action', run: 'go', account: 'julian-garrett'}
+Блокнот запросов к site. Не чат — журнал: пишешь %request, запускаешь,
+ответ дописывается блоком %result в этот же файл.
+
+    runz rz examples/notebook/site-chat.mds
+    runz rz examples/notebook/site-chat.mds --request=<url персонажа>
+
+Обходит баг чуба: старый чат персонажа не открывается — создаём новый
+через core/chats с force_new. 500 нестабильна — повторяем (--retries=5).
+
+Токен берётся из звена cfg: ## $site-account <account> -> $token.
+
+%source cfg {nr: {type: 'file', parse: 'mdz'}, path: 'S:\\appz\\site\\site.config.md'}
+%fn go {nr: {lang: 'ts'}}
+```ts
+import { parse as parseChat, stringify as stringifyChat } from '@kerneldreams/nrd/chat'
+
+const CHAR_RE = /site\.ai\/characters\/([\w.-]+\/[\w.-]+)/i
+
+/** URL или голый id -> character_id вида Autor/slug-hash. */
+function charId(s) {
+  const m = s.match(CHAR_RE)
+  if (m) return m[1]
+  const bare = s.trim()
+  return /^[\w.-]+\/[\w.-]+$/.test(bare) ? bare : undefined
+}
+
+/** Токен аккаунта из цепочки: ## $site-account <name> -> $token. */
+function token(ctx, helpers) {
+  const direct = helpers.attr('token')
+  if (direct) return direct
+  const account = helpers.attr('account')
+  if (!account) throw new Error('нет $account и нет --token=')
+  const block = ctx.get(['cfg', 'site-account', account])
+  const t = block && typeof block.get === 'function' ? block.get(['token']) : undefined
+  const s = t == null ? undefined : String(t)
+  if (!s) throw new Error('аккаунт "' + account + '" не найден или без $token')
+  return s
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+async function postChat(character_id, tok) {
+  const res = await fetch('https://api.example.com/api/core/chats', {
+    method: 'POST',
+    headers: { 'ch-api-key': tok, samwise: tok, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ character_id, force_new: true }),
+  })
+  const raw = await res.text()
+  let data = null
+  try { data = JSON.parse(raw) } catch {}
+  return { ok: res.ok, status: res.status, raw, data }
+}
+
+/**
+ * 500 у чуба нестабильна: тот же запрос со второй-третьей попытки проходит.
+ * UI повторить не даёт (кнопка «начать чат» уводит на сломанный), поэтому
+ * повтор — и есть смысл скрипта. Неудачная попытка оставляет за собой битый
+ * чат (tail_id null, chat_count 0) — их собираем, чтобы было видно в журнале.
+ */
+async function createChat(character_id, tok, tries, log) {
+  const junk = []
+  for (let i = 1; i <= tries; i++) {
+    const r = await postChat(character_id, tok)
+    const id = r.data && (r.data.id || r.data.chat_id || (r.data.chat && r.data.chat.id))
+    if (r.ok && id) return { id, attempts: i, junk }
+    if (id) junk.push(id)
+    log('попытка ' + i + '/' + tries + ' — ' + r.status + (id ? ' (осталась пустышка ' + id + ')' : ''))
+    if (i < tries) await sleep(800 * i)
+  }
+  throw new Error('не удалось создать чат за ' + tries + ' попыток' +
+    (junk.length ? '; пустышки: ' + junk.join(', ') : ''))
+}
+
+export default async function (ctx, meta, helpers) {
+  const file = String(meta.file)
+  const name = file.slice(file.replace(/\\/g, '/').lastIndexOf('/') + 1)
+
+  let text = helpers.read(name)
+  if (text === undefined) return { output: 'не смог прочитать себя: ' + name, exitCode: 1 }
+
+  // --request=<url> дописывает новый запрос в конец файла
+  const cliRequest = helpers.attr('request')
+  if (cliRequest) text = text.replace(/\s*$/, '') + '\n\n%request\n' + cliRequest + '\n'
+
+  const msgs = parseChat(text)
+
+  // Хвост после последнего блока, отделённый '---', тоже считается запросом.
+  const last = msgs[msgs.length - 1]
+  if (last && last.role !== 'request') {
+    const cut = last.body.lastIndexOf('\n---')
+    if (cut >= 0) {
+      const tail = last.body.slice(cut + 4).trim()
+      if (tail) {
+        last.body = last.body.slice(0, cut)
+        msgs.push({ role: 'request', body: tail + '\n' })
+      }
+    }
+  }
+
+  // Последний %request, у которого ещё нет ответа.
+  let idx = -1
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].role === 'result') break
+    if (msgs[i].role === 'request') { idx = i; break }
+  }
+  if (idx < 0) return { output: 'нечего выполнять: нет %request без %result' }
+
+  const req = msgs[idx].body.trim()
+  const id = charId(req)
+  if (!id) return { output: 'не нашёл character_id в запросе: ' + req.slice(0, 80), exitCode: 1 }
+
+  helpers.log('создаю чат: ' + id)
+  let body
+  try {
+    const tries = Number(helpers.attr('retries') || 5)
+    const res = await createChat(id, token(ctx, helpers), tries, helpers.log)
+    body = 'https://example.com/chats/' + res.id
+    if (res.attempts > 1) body += '\n(с ' + res.attempts + '-й попытки)'
+    if (res.junk.length) body += '\nпустышки от неудачных попыток: ' + res.junk.join(', ')
+  } catch (e) {
+    body = 'ОШИБКА: ' + (e && e.message ? e.message : String(e))
+  }
+
+  msgs.splice(idx + 1, 0, { role: 'result', body: body + '\n' })
+  helpers.write(name, stringifyChat(msgs))
+  return { output: body }
+}
+```
+
+%request
+https://example.com/characters/Some_User/olga-petrov-34aabeab75bc
+%result
+https://example.com/chats/180157824
+
+%request
+https://example.com/characters/Some_User/skyhold-dreadmoor-a6b2cf71b294
+%result
+ОШИБКА: site API 500: {"success":false,"message":"Error: Unknown","errorCode":500}
+
+%request
+https://example.com/characters/Some_User/skyhold-dreadmoor-a6b2cf71b294
+%result
+https://example.com/chats/180160464
+
+%request
+https://example.com/characters/Mookey_D_Troll/sienna-e6204670df61
+
+%result
+https://example.com/chats/180200036
+
+%request
+https://example.com/characters/Drive_knight_arts/failed-open-relationship-d870181f2d0e
+
+%result
+https://example.com/chats/180698363
+

@@ -1,0 +1,22 @@
+$run: trace
+$slug: from-doc
+
+Пример: полная цепочка резолва одного ключа `slug`.
+Проверяет, что путь источника и код видят ОДНО значение.
+
+## $source data
+$nr: {type: 'file', parse: 'mdd'}
+$path: ./data/${slug}.md
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  const lines = [
+    'slug через helpers.attr : ' + String(helpers.attr('slug')),
+    'slug через ${} в ctx    : ' + String(ctx.get(['slug'])),
+    'marker из источника     : ' + String(ctx.get(['data', 'marker'])),
+    'note   из источника     : ' + String(ctx.get(['data', 'note'])),
+  ]
+  return { output: lines.join('\n') }
+}
+```

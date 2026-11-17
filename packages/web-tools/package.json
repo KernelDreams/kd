@@ -1,0 +1,46 @@
+{
+  "name": "@kerneldreams/web-tools",
+  "version": "0.1.0",
+  "description": "Web search and page reading for agents: web_search (DuckDuckGo, Brave, SearXNG) and web_fetch (HTML to text, SSRF guard) as functions and ready tools.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/web-tools"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tools": {
+      "types": "./dist/tools.d.ts",
+      "import": "./dist/tools.js",
+      "default": "./dist/tools.js"
+    }
+  },
+  "files": [
+    "src",
+    "README.md",
+    "dist"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:live": "NR_WEB_LIVE=1 vitest run test/live.test.ts",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "@kerneldreams/nrd": "0.1.0",
+    "@kerneldreams/web": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

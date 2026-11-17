@@ -1,0 +1,13 @@
+$type: helpers-handler
+$provider: mock
+$mock_reply: ответ мока
+$mock_echo: true
+$who: appz
+$tags: $[a, b]
+
+Документ с `$type`: appz получает те же helpers, что и `## $handler`.
+
+## $fn local
+```ts
+export default async () => ({ output: 'fn документа' })
+```

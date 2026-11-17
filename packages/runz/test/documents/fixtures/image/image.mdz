@@ -1,0 +1,25 @@
+$// helpers.image: картинки на моке ($type: mock → PNG 1×1, без сети).
+$provider: mock
+// $image_provider — сильнее $provider: глобальный конфиг машины ($image_provider: gate) не перебивает мок.
+$image_provider: mock
+$image_model: flux-3-image
+$run: go
+
+## $action go
+```ts
+export default async function (ctx, meta, helpers) {
+  const out = helpers.attr('out')
+  const one = await helpers.image('a red fox in snow', { params: { resolution: '1k' }, out: out + '/fox.png' })
+  const many = await helpers.image('three foxes', { model: 'flux-2-pro', params: { n: 3 }, out: out + '/many/fox.png' })
+  const auto = await helpers.image('default path')
+  return { output: JSON.stringify({ one, many, auto }) }
+}
+```
+
+## $action noprov
+```ts
+export default async function (ctx, meta, helpers) {
+  await helpers.image('x', { out: helpers.attr('out') + '/x.png' })
+  return { output: 'unreachable' }
+}
+```

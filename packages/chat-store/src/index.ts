@@ -1,0 +1,111 @@
+/**
+ * @kerneldreams/chat-store — neutral chat-session model + storage contract.
+ *
+ * core = model types + pure tree math + driver contract + registry, zero-dep.
+ * Drivers ship as subpaths (`./mds`, `./pi`, `./claude`): a consumer of one
+ * doesn't drag in the others' dependencies.
+ *
+ * Key inversion (spec §1): message anatomy (Part/Message/SessionInfo) lives
+ * here; nr-ui-protocol re-exports it and stays the wire layer.
+ *
+ * Canon: S:\skills\nr-system.dev\specs\chat-store-spec.md
+ */
+
+// §3 model
+export type {
+  SessionInfo,
+  SessionShare,
+  SessionRun,
+  SessionTask,
+  ProfileDoc,
+  AgentVoice,
+  Participant,
+  Persona,
+  PersonaKind,
+  PersonasDoc,
+  Message,
+  MessageFlags,
+  MessageMeta,
+  MessageSpeech,
+  Usage,
+  Part,
+  AnyPart,
+  UnknownPart,
+  KnownPartType,
+  TextPart,
+  ThinkingPart,
+  ToolUsePart,
+  ToolResultPart,
+  SubagentMarks,
+  FilePart,
+  ImagePart,
+  ErrorPart,
+  CustomPart,
+  ModelSelection,
+  SessionModel,
+  StoreNode,
+  NodeInput,
+} from './model.js'
+
+// §4 tree math + projections
+export {
+  resolveTree,
+  activeLeaf,
+  activePath,
+  siblingsOf,
+  swipeInfo,
+  descendToLeaf,
+  nodeToMessage,
+  toHistory,
+  toThread,
+  contentHash,
+} from './tree.js'
+export type { Tree, SwipeInfo, ThreadNode } from './tree.js'
+
+// §5 driver contract
+export {
+  StoreConflictError,
+  StoreNodeNotFound,
+  StoreSessionNotFound,
+  StoreAssetNotFound,
+  StoreInvalidId,
+  assertSafeId,
+  assertSafeAssetName,
+  partsOf,
+  replaceTextParts,
+  mergeMeta,
+} from './store.js'
+export type { SessionStore, StoreCapabilities, NodePatch, SessionMoveTo } from './store.js'
+
+// Расширения стора живого бэкенда: выбор, персоны, рецепты, компакция
+export type {
+  ExtendedSessionStore,
+  StoreChoicesApi,
+  StoreSessionChoices,
+  StoreModelChoice,
+  StorePersonasApi,
+  StorePersonasDoc,
+  StoreRecipesApi,
+  StoreCompactionApi,
+  StoreCompactionInput,
+} from './extensions.js'
+
+// §6 registry
+export { register, unregister, registered, getStore } from './registry.js'
+export type { StoreFactory } from './registry.js'
+
+// Вид чата и происхождение имени (v1.44)
+export {
+  SESSION_KINDS,
+  TITLE_SOURCES,
+  AUTO_PROFILES,
+  PROBE_PROFILES,
+  isSessionKind,
+  isTitleSource,
+  isProtectedTitle,
+  isAutoTitle,
+  sessionKindOf,
+  titleSourceOf,
+} from './kind.js'
+export type { SessionKind, TitleSource, KindInput } from './kind.js'
+export { archivedOf, normTags } from './archive.js'

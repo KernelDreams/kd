@@ -1,0 +1,145 @@
+$run: all
+$model: google/gemini-2.5-flash
+$temperature: 0.3
+$max_tokens: 4096
+$source: ./sources.tbl
+$db_dir: ./db
+$profiles_dir: ./profiles
+
+## $prompt extract
+%system
+Составь список персонажей из произведения.
+Критерии: раскрыт характер, влияет на сюжет, не массовка.
+Для сериалов — основной каст + яркие второстепенные.
+Для фильмов — главные + запоминающиеся второстепенные.
+Имена на языке оригинала + (название произведения) в скобках.
+
+Каждый персонаж — секция @char с @slug (kebab-case).
+
+Формат СТРОГО:
+
+## @char Catherine Tramell (Basic Instinct)
+@slug: catherine-tramell
+@role: antagonist
+
+Описание 2-3 предложения.
+
+%user
+<< name >> (<< type >>, << year >>)
+Genre: << genre >> | Tags: << tags >>
+
+## $prompt describe
+%system
+Составь подробный профиль персонажа для RP-бота.
+
+Три секции:
+
+### PERSONALITY
+2-3 предложения. Характер, мотивация, базовое противоречие, эмоциональный рисунок.
+
+### SPEECH PATTERN
+Как говорит: формальность, словарный запас, фишки речи, обращение к собеседнику.
+
+### BEHAVIOR
+Как действует: инициатива, реакция на конфликт, что выдаёт настоящие чувства, контраст публичного и приватного.
+
+Без вступлений и заключений. Только профиль.
+
+%user
+<< char_name >>
+Роль: << role >>
+
+Из первичного описания:
+<< body >>
+
+## $action extract
+```ts
+export default async function(ctx, meta, helpers) {
+  const records = helpers.readTbl(helpers.attr('source'))
+  const outDir = helpers.attr('db_dir') ?? './db'
+  let done = 0, skipped = 0
+
+  for (const row of records) {
+    const slug = String(row.slug ?? row.name)
+    const outFile = outDir + '/' + slug + '.md'
+
+    if (helpers.exists(outFile)) {
+      helpers.log('skip: ' + slug)
+      skipped++
+      continue
+    }
+
+    helpers.log('extract: ' + slug + ' ...')
+    const messages = helpers.render('extract', row)
+    const result = await helpers.llm(messages)
+    helpers.write(outFile, result)
+    helpers.log('done: ' + slug + ' (' + result.length + ' chars)')
+    done++
+  }
+
+  return { output: 'Extract: done=' + done + ' skip=' + skipped }
+}
+```
+
+## $action describe
+```ts
+import { parseDocument, asText, isContext, isArray } from '@kerneldreams/nrd'
+
+export default async function(ctx, meta, helpers) {
+  const dbDir = helpers.attr('db_dir') ?? './db'
+  const profilesDir = helpers.attr('profiles_dir') ?? './profiles'
+  let done = 0, skipped = 0
+
+  const files = helpers.listDir(dbDir).filter(f => f.endsWith('.md'))
+
+  for (const file of files) {
+    const sourceSlug = file.replace('.md', '')
+    const text = helpers.read(dbDir + '/' + file)
+    if (!text) continue
+
+    const doc = parseDocument(text, { sigil: '@' })
+    const chars = doc.get(['char'])
+    if (!isArray(chars)) continue
+
+    for (const item of chars.iterate()) {
+      if (!isContext(item)) continue
+      const slug = asText(item.get(['slug'])) ?? 'unknown'
+      const outFile = profilesDir + '/' + sourceSlug + '/' + slug + '.md'
+
+      if (helpers.exists(outFile)) {
+        helpers.log('skip: ' + sourceSlug + '/' + slug)
+        skipped++
+        continue
+      }
+
+      const charName = String(item.cast('id') ?? 'Unknown')
+      const role = asText(item.get(['role'])) ?? ''
+      const body = String(item.cast('text') ?? '')
+
+      helpers.log('describe: ' + sourceSlug + '/' + slug + ' ...')
+      const messages = helpers.render('describe', { char_name: charName, role, body, source: sourceSlug })
+      const result = await helpers.llm(messages)
+      helpers.write(outFile, result)
+      helpers.log('done: ' + sourceSlug + '/' + slug)
+      done++
+    }
+  }
+
+  return { output: 'Describe: done=' + done + ' skip=' + skipped }
+}
+```
+
+## $action all
+```ts
+export default async function(ctx, meta, helpers) {
+  helpers.log('=== Step 1: Extract characters ===')
+  const r1 = await helpers.run('extract')
+  helpers.log(r1.output ?? '')
+
+  helpers.log('=== Step 2: Describe characters ===')
+  const r2 = await helpers.run('describe')
+  helpers.log(r2.output ?? '')
+
+  return { output: 'Pipeline complete.\n' + (r1.output ?? '') + '\n' + (r2.output ?? '') }
+}
+```

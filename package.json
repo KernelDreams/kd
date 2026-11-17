@@ -1,0 +1,24 @@
+{
+  "name": "kd-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "KernelDreams core: documents, runtime, chat engine — one repo, packages as folders, one version.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/boundaries.mjs && node scripts/build-order.mjs --check && node scripts/test.mjs",
+    "boundaries": "node scripts/boundaries.mjs",
+    "build-order": "node scripts/build-order.mjs",
+    "version:set": "node scripts/version.mjs",
+    "hooks": "node scripts/install-hooks.mjs",
+    "guard": "node scripts/guard.mjs"
+  }
+}

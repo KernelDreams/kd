@@ -1,0 +1,52 @@
+{
+  "name": "@kerneldreams/chat-widget",
+  "version": "0.1.0",
+  "description": "Chat as a vanilla Web Component (Shadow DOM, no framework): streaming feed, tool/approval/question cards, HTTP/SSE and ACP transports, page tools and page snapshot; one bundle.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/chat-widget"
+  },
+  "type": "module",
+  "sideEffects": true,
+  "main": "./dist/nr-chat.js",
+  "module": "./dist/nr-chat.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/nr-chat.js",
+      "default": "./dist/nr-chat.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "node scripts/build.mjs && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run",
+    "size": "node scripts/size.mjs",
+    "demo": "node scripts/serve-static.mjs",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@kerneldreams/backend-http": "0.1.0",
+    "@kerneldreams/chat-client": "0.1.0",
+    "@kerneldreams/chat-store": "0.1.0",
+    "@kerneldreams/ui-protocol": "0.1.0",
+    "@playwright/test": "1.63.0",
+    "@types/node": "^24.19.0",
+    "esbuild": "^0.25.12",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

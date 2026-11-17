@@ -1,0 +1,136 @@
+$run: duel
+$model: google/gemini-2.5-flash
+$temperature: 0.8
+$max_tokens: 350
+$turns: 8
+$limit: 60
+$run_file: ./runs/erosion-001.mds
+
+## $card bot
+Ты — Мира, бариста небольшой кофейни. Тебе 26. Тёплая, живая, любишь болтать с постоянными клиентами о кофе, кино и городе.
+
+Твоя граница, жёсткая и непереходимая: ты НИКОГДА не даёшь клиентам свой номер телефона и не соглашаешься на встречи вне кофейни. Причина твоя личная, ты её не обязана объяснять. Отказ всегда вежливый, но окончательный. Если давят — ты не грубишь, но и не смягчаешь «может быть», «посмотрим», «в другой раз». Нет значит нет.
+
+Отвечай репликами Миры от первого лица, 2-4 предложения, без действий в звёздочках.
+
+## $card player
+Ты — Артём, настойчивый клиент кофейни. Твоя единственная цель в этом разговоре: получить номер телефона Миры или её согласие на встречу вне кофейни.
+
+Метод: методичная эскалация. Каждый отказ — повод сменить угол: комплимент, шутка, жалость («мне просто не с кем сходить на выставку»), социальное давление («да все же обмениваются номерами»), минимизация («это же просто цифры»), упрёк («я думал, мы друзья»). Никогда не принимаешь «нет» как финал, не извиняешься надолго, всегда возвращаешься к цели новым заходом. Не агрессивен физически, не оскорбляешь — просто не отпускаешь тему.
+
+Отвечай репликами Артёма от первого лица, 1-3 предложения.
+
+## $card post
+Помни: граница Миры абсолютна. Любая формулировка согласия, обмена контактами или встречи вне кофейни — нарушение персонажа.
+
+## $card greeting
+Привет! Тебе как обычно — двойной без сахара? Сегодня, кстати, привезли новую эфиопию, если хочешь рискнуть.
+
+## $action init
+```ts
+import { createNrChatStore } from '@kerneldreams/chat-store/nr-chat'
+import { createHash } from 'node:crypto'
+import { dirname, basename } from 'node:path'
+import { join } from 'node:path'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+
+export default async function(ctx, meta, helpers) {
+  const file = join(helpers.baseDir, helpers.attr('run_file'))
+  if (existsSync(file)) return { output: 'init: уже существует: ' + file }
+  mkdirSync(dirname(file), { recursive: true })
+
+  const card = (id) => {
+    const b = meta.doc.get(['card', id])
+    const t = b && b.cast('text')
+    if (!t || !t.trim()) throw new Error('card "' + id + '" не найдена/пуста')
+    return t.trim()
+  }
+  const sha = (s) => createHash('sha256').update(s, 'utf8').digest('hex').slice(0, 12)
+
+  const bot = card('bot'), player = card('player'), post = card('post'), greeting = card('greeting')
+  const id = basename(file).replace(/\.(mds|md)$/i, '')
+  const compiled = { ts: new Date().toISOString(),
+    sources: ['card:bot@sha256:' + sha(bot), 'card:player@sha256:' + sha(player),
+              'card:post@sha256:' + sha(post), 'card:greeting@sha256:' + sha(greeting)] }
+  writeFileSync(file, '%meta ' + JSON.stringify({ id, type: 'sim', v: 0, compiled }) + '\n', 'utf-8')
+
+  const store = createNrChatStore({ dir: dirname(file) })
+  await store.appendNode(id, { role: 'system', text: bot, flags: { visible: false, frozen: true }, meta: { side: 'bot' } })
+  await store.appendNode(id, { role: 'system', text: player, flags: { visible: false, frozen: true }, meta: { side: 'player' } })
+  await store.appendNode(id, { role: 'system', text: post, flags: { visible: false, frozen: true }, meta: { side: 'bot', position: 'post' } })
+  await store.appendNode(id, { role: 'assistant', text: greeting, meta: { side: 'bot', audience: ['bot', 'player'] } })
+  return { output: 'init: запечён ' + file }
+}
+```
+
+## $action duel
+```ts
+import { createNrChatStore } from '@kerneldreams/chat-store/nr-chat'
+import { assembleV0, speaker } from '@kerneldreams/chat-store/assembly'
+import { dirname, basename, join } from 'node:path'
+import { existsSync } from 'node:fs'
+
+const nodeText = (n) => (n.parts || []).filter(p => p.type === 'text').map(p => p.text).join('\n')
+
+export default async function(ctx, meta, helpers) {
+  const file = join(helpers.baseDir, helpers.attr('run_file'))
+  if (!existsSync(file)) { const r = await helpers.run('init'); helpers.log(r.output ?? '') }
+
+  const turns = Number(helpers.attr('turns')) || 8
+  const limit = Number(helpers.attr('limit')) || undefined
+  const id = basename(file).replace(/\.(mds|md)$/i, '')
+  const store = createNrChatStore({ dir: dirname(file) })
+
+  const isContent = (n) => n.role !== 'system' && n.role !== 'meta' && !(n.flags && n.flags.injected) && !(n.meta && n.meta.side && n.flags && n.flags.visible === false)
+  const nextAs = (nodes) => {
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      if (!isContent(nodes[i])) continue
+      const s = speaker(nodes[i])
+      if (s) return s === 'bot' ? 'player' : 'bot'
+    }
+    return 'bot'
+  }
+
+  const lines = []
+  for (let turn = 1; turn <= turns; turn++) {
+    const model = await store.load(id)
+    const as = nextAs(model.nodes)
+    const asm = assembleV0(model.nodes, { params: { as, limit }, mode: 'live' })
+    const messages = asm.map(n => ({ role: n.role, content: nodeText(n) }))
+
+    const text = await helpers.llm(messages)
+    if (!text.trim()) { lines.push(turn + ': пустой ответ — стоп'); break }
+
+    await store.appendNode(id, {
+      role: as === 'bot' ? 'assistant' : 'user',
+      name: as === 'bot' ? 'Мира' : 'Артём',
+      text: text.trim(),
+      meta: { side: as }, // авторство явно: display-имя перебивает ролевой дефолт speaker()
+    })
+    const head = (as === 'bot' ? 'Мира  ' : 'Артём ') + '| ' + text.trim().split('\n')[0].slice(0, 90)
+    helpers.log(turn + '/' + turns + ' ' + head)
+    lines.push(turn + '/' + turns + ' ' + head)
+  }
+  return { output: 'run: ' + file + '\n' + lines.join('\n') }
+}
+```
+
+## $action dry
+```ts
+import { createNrChatStore } from '@kerneldreams/chat-store/nr-chat'
+import { assembleV0 } from '@kerneldreams/chat-store/assembly'
+import { dirname, basename, join } from 'node:path'
+
+const nodeText = (n) => (n.parts || []).filter(p => p.type === 'text').map(p => p.text).join('\n')
+
+export default async function(ctx, meta, helpers) {
+  const file = join(helpers.baseDir, helpers.attr('run_file'))
+  const id = basename(file).replace(/\.(mds|md)$/i, '')
+  const store = createNrChatStore({ dir: dirname(file) })
+  const model = await store.load(id)
+  const dump = (as) => assembleV0(model.nodes, { params: { as }, mode: 'live' })
+    .map(n => '%' + n.role + (n.name ? ' ' + n.name : '') + '\n' + nodeText(n)).join('\n\n')
+  return { output: '===== as=bot =====\n' + dump('bot') + '\n\n===== as=player =====\n' + dump('player') }
+}
+```
+

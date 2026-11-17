@@ -1,0 +1,31 @@
+$run: trace
+
+Пример: источник, зависящий от другого источника.
+`registry` читается первым, `bot` берёт путь из его поля `active`.
+Плюс функция, отдающая значение в `${}` третьего звена.
+
+## $source registry
+$nr: {type: 'file', parse: 'mdd'}
+$path: ./bots/registry.md
+
+## $source bot
+$nr: {type: 'file', parse: 'mdd'}
+$path: ./bots/${registry.active}.md
+
+## $source label
+$nr: {type: 'inline', parse: 'mdd'}
+
+@text: ${bot.name} (${bot.voice})
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  const lines = [
+    'registry.active : ' + String(ctx.get(['registry', 'active'])),
+    'bot.name        : ' + String(ctx.get(['bot', 'name'])),
+    'bot.persona     : ' + String(ctx.get(['bot', 'persona'])),
+    'label.text      : ' + String(ctx.get(['label', 'text'])),
+  ]
+  return { output: lines.join('\n') }
+}
+```

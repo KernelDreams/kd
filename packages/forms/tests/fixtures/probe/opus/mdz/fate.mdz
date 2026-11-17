@@ -1,0 +1,290 @@
+$editor: 1
+$id: fate
+$title: Fate Condensed
+
+## $section character
+$title: Персонаж
+
+### $field portrait
+$row: r1
+$type: string
+$label: Портрет
+$widget: image
+$props: {aspect: "2:3"}
+
+### $field name
+$row: r1
+$type: string
+$label: Имя
+$required: true
+
+### $field description
+$type: string
+$label: Описание
+$widget: textarea
+$props: {rows: 4}
+
+### $field refresh
+$row: r2
+$type: integer
+$label: Восстановление
+$widget: number
+$min: 0
+$default: 3
+$props: {min: 0}
+
+### $field fatePoints
+$row: r2
+$type: integer
+$label: Жетоны судьбы
+$widget: fate.fate-points
+$min: 0
+$default: 3
+$props: {refreshFrom: "refresh"}
+
+## $section aspects
+$title: Аспекты
+
+### $field highConcept
+$type: string
+$label: Концепция
+$widget: fate.aspect
+$props: {kind: "high-concept"}
+
+### $field trouble
+$type: string
+$label: Проблема
+$widget: fate.aspect
+$props: {kind: "trouble"}
+
+### $repeat aspects
+$label: Другие аспекты
+$item-title: text
+
+#### $field text
+$type: string
+$label: Аспект
+$widget: fate.aspect
+$props: {kind: "other"}
+
+## $section skills
+$title: Навыки
+
+### $group skills
+
+#### $field academics
+$type: integer
+$label: Academics
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field athletics
+$type: integer
+$label: Athletics
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field burglary
+$type: integer
+$label: Burglary
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field contacts
+$type: integer
+$label: Contacts
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field crafts
+$type: integer
+$label: Crafts
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field deceive
+$type: integer
+$label: Deceive
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field drive
+$type: integer
+$label: Drive
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field empathy
+$type: integer
+$label: Empathy
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field fight
+$type: integer
+$label: Fight
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field investigate
+$type: integer
+$label: Investigate
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field lore
+$type: integer
+$label: Lore
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field notice
+$type: integer
+$label: Notice
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field physique
+$type: integer
+$label: Physique
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field provoke
+$type: integer
+$label: Provoke
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field rapport
+$type: integer
+$label: Rapport
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field resources
+$type: integer
+$label: Resources
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field shoot
+$type: integer
+$label: Shoot
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field stealth
+$type: integer
+$label: Stealth
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+#### $field will
+$type: integer
+$label: Will
+$widget: fate.ladder
+$min: -2
+$max: 8
+$default: 0
+
+## $section stunts
+$title: Трюки
+
+### $repeat stunts
+$label: Трюки
+$item-title: name
+
+#### $field name
+$type: string
+$label: Название
+$required: true
+
+#### $field description
+$type: string
+$label: Описание
+$widget: textarea
+$props: {rows: 3}
+
+## $section stress
+$title: Стресс и последствия
+
+### $computed physicalBoxes
+$label: Ячеек физического
+$expr: "<< 3 + (1 if skills.physique >= 1 else 0) + (1 if skills.physique >= 3 else 0) >>"
+$type: number
+
+### $computed mentalBoxes
+$label: Ячеек ментального
+$expr: "<< 3 + (1 if skills.will >= 1 else 0) + (1 if skills.will >= 3 else 0) >>"
+$type: number
+
+### $group stress
+
+#### $field physical
+$type: boolean[]
+$label: Физический
+$widget: fate.stress-track
+$props: {boxes: "=physicalBoxes"}
+
+#### $field mental
+$type: boolean[]
+$label: Ментальный
+$widget: fate.stress-track
+$props: {boxes: "=mentalBoxes"}
+
+### $group consequences
+
+#### $field mild
+$type: string
+$label: Лёгкое
+$widget: fate.consequence
+$props: {severity: "mild", value: 2}
+
+#### $field moderate
+$type: string
+$label: Среднее
+$widget: fate.consequence
+$props: {severity: "moderate", value: 4}
+
+#### $field severe
+$type: string
+$label: Тяжёлое
+$widget: fate.consequence
+$props: {severity: "severe", value: 6}

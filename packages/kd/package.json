@@ -1,0 +1,73 @@
+{
+  "name": "@kerneldreams/kd",
+  "version": "0.1.0",
+  "description": "kd command: one entry point for tools, documents and actions over anything (successor of the runz CLI).",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/kd"
+  },
+  "type": "module",
+  "bin": {
+    "kd": "./bin/kd.mjs"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "tools",
+    "links.mdz",
+    "README.md"
+  ],
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc",
+    "test": "npm run build && vitest run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./palette": {
+      "types": "./dist/node/palette.d.ts",
+      "import": "./dist/node/palette.js"
+    },
+    "./node": {
+      "types": "./dist/node/index.d.ts",
+      "import": "./dist/node/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@kerneldreams/forms": "0.1.0",
+    "@kerneldreams/nrd": "0.1.0",
+    "@kerneldreams/ui-protocol": "0.1.0",
+    "@kerneldreams/runz-runtime": "0.1.0",
+    "undici": "^7.0.0",
+    "@kerneldreams/runz": "0.1.0",
+    "@kerneldreams/backend-http": "0.1.0",
+    "@kerneldreams/chat-widget": "0.1.0",
+    "@kerneldreams/runz-run": "0.1.0",
+    "@kerneldreams/chat-store": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0",
+    "playwright": "^1.63.0"
+  }
+}

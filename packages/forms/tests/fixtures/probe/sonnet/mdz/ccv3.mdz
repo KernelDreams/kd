@@ -1,0 +1,245 @@
+$editor: 1
+$id: ccv3
+$title: Карточка бота (Character Card V3)
+
+## $section meta
+$title: Формат
+$collapsed: true
+
+### $field spec
+$row: r1
+$type: string
+$label: spec
+
+### $field spec_version
+$row: r1
+$type: string
+$label: spec_version
+
+## $section main
+$title: Основное
+
+### $field name
+$row: r2
+$path: data.name
+$type: string
+$label: Имя
+$required: true
+
+### $field nickname
+$row: r2
+$path: data.nickname
+$type: string
+$label: Псевдоним
+
+### $field kind
+$path: data.extensions.nrchat.kind
+$type: string
+$label: Вид
+$enum: $[bot, persona]
+$widget: select
+$props: {labels: {bot: "Бот", persona: "Персона"}}
+
+### $field description
+$path: data.description
+$type: string
+$label: Описание
+$widget: textarea
+$props: {rows: 6}
+
+### $field personality
+$path: data.personality
+$type: string
+$label: Характер
+$widget: textarea
+$props: {rows: 4}
+
+### $field scenario
+$path: data.scenario
+$type: string
+$label: Сценарий
+$widget: textarea
+$props: {rows: 4}
+
+### $field tags
+$path: data.tags
+$type: string[]
+$label: Теги
+$widget: tags
+
+## $section dialog
+$title: Диалог
+$show-if: {"data.extensions.nrchat.kind": ["bot"]}
+
+### $field first_mes
+$path: data.first_mes
+$type: string
+$label: Первое сообщение
+$widget: textarea
+$props: {rows: 6}
+
+### $field alternate_greetings
+$path: data.alternate_greetings
+$type: string[]
+$label: Альтернативные гритинги
+$widget: ccv3.greetings
+
+### $field group_only_greetings
+$path: data.group_only_greetings
+$type: string[]
+$label: Гритинги только для групп
+$widget: ccv3.greetings
+
+### $field mes_example
+$path: data.mes_example
+$type: string
+$label: Примеры сообщений
+$widget: textarea
+$props: {rows: 8}
+
+## $section prompts
+$title: Промпты
+
+### $field system_prompt
+$path: data.system_prompt
+$type: string
+$label: Системный промпт
+$widget: textarea
+$props: {rows: 6}
+
+### $field post_history_instructions
+$path: data.post_history_instructions
+$type: string
+$label: Инструкции после истории
+$widget: textarea
+$props: {rows: 4}
+
+## $section authorship
+$title: Авторство
+
+### $field creator_notes
+$path: data.creator_notes
+$type: string
+$label: Заметки автора
+$widget: markdown
+
+### $field creator
+$row: r3
+$path: data.creator
+$type: string
+$label: Автор
+
+### $field character_version
+$row: r3
+$path: data.character_version
+$type: string
+$label: Версия персонажа
+
+## $section lorebook
+$title: Лорбук
+
+### $field book_name
+$row: r4
+$path: data.character_book.name
+$type: string
+$label: Название
+
+### $field scan_depth
+$row: r4
+$path: data.character_book.scan_depth
+$type: integer
+$label: Глубина сканирования
+$min: 0
+
+### $field token_budget
+$row: r4
+$path: data.character_book.token_budget
+$type: integer
+$label: Бюджет токенов
+$min: 0
+
+### $field recursive_scanning
+$row: r4
+$path: data.character_book.recursive_scanning
+$type: boolean
+$label: Рекурсивное сканирование
+
+### $repeat data.character_book.entries
+$label: Записи
+$item-title: name
+
+#### $field name
+$type: string
+$label: Название
+
+#### $field keys
+$type: string[]
+$label: Ключи
+$widget: ccv3.lorebook-keys
+
+#### $field content
+$type: string
+$label: Содержимое
+$widget: textarea
+$props: {rows: 5}
+
+#### $field enabled
+$row: r5
+$type: boolean
+$label: Включена
+
+#### $field case_sensitive
+$row: r5
+$type: boolean
+$label: Учитывать регистр
+
+#### $field insertion_order
+$row: r5
+$type: integer
+$label: Порядок вставки
+
+#### $field priority
+$row: r5
+$type: integer
+$label: Приоритет
+
+#### $field comment
+$type: string
+$label: Комментарий
+
+## $section assets
+$title: Ассеты
+
+### $repeat data.assets
+$label: Ассеты
+$item-title: name
+
+#### $field uri
+$type: string
+$label: Файл
+$widget: image
+
+#### $field type
+$row: r6
+$type: string
+$label: Тип
+
+#### $field name
+$row: r6
+$type: string
+$label: Название
+
+#### $field ext
+$row: r6
+$type: string
+$label: Расширение
+
+## $section extensions
+$title: Расширения
+$collapsed: true
+
+### $field extensions
+$path: data.extensions
+$type: object
+$label: extensions
+$widget: json

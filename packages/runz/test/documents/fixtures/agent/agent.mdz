@@ -1,0 +1,42 @@
+$// helpers.agent: агент backend-nr в $action на заглушке провайдера.
+$provider: mock
+$mock_reply: Прототип: Тест
+$run: go
+
+## $agent
+$tools: read, write
+$tool_policy: {write: 'ask'}
+Ты — агент шага. Отвечай коротко.
+
+## $action go
+```ts
+export default async function (ctx, meta, helpers) {
+  const agent = await helpers.agent()
+  const s = await agent.session({ file: 'fork.mds' })
+  const r = await s.run('шаг proto')
+  await s.tag(r.lastId, { step: 'proto', pass: 'agent' })
+  const r2 = await s.swipe()
+  const nodes = await s.history()
+  const [a, b] = await Promise.all([agent.session({ file: 'a.mds' }), agent.session({ file: 'b.mds' })])
+  const both = await Promise.all([a.run('один'), b.run('два')])
+  return { output: JSON.stringify({
+    text: r.lastText(),
+    swipe: r2.lastText(),
+    tagged: nodes.filter(n => n.meta?.step === 'proto').length,
+    siblings: nodes.filter(n => n.role === 'assistant' && n.parent === nodes.find(x => x.id === r.lastId).parent).length,
+    system: JSON.stringify(r.recipe ?? {}).includes('Отвечай коротко'),
+    tools: JSON.stringify(r.recipe ?? {}),
+    file: s.file,
+    parallel: both.map(x => x.lastText()),
+  }) }
+}
+```
+
+## $action fromfile
+```ts
+export default async function (ctx, meta, helpers) {
+  const agent = await helpers.agent({ profile: 'reader.mdz' })
+  const r = await (await agent.session()).run('привет')
+  return { output: JSON.stringify(r.recipe ?? {}) }
+}
+```

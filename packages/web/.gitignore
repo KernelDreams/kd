@@ -1,0 +1,29 @@
+node_modules/
+dist/
+.env
+*.log
+
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+*.csproj
+*.sln
+
+# Cocos
+local/
+temp/
+build/
+
+# System
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Windows reserved names
+**/nul
+**/NUL
+.claude/
+.code/

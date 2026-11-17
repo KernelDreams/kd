@@ -1,0 +1,25 @@
+$run: trace
+
+Зонд: инклуды внутри тела блока-источника (makefile-форма forge).
+Ожидание: preset перекрывает traits персоны, остальное складывается.
+
+## $source bot
+$nr: {type: 'inline', parse: 'mdz'}
+
+$[[./parts/personality.md]]
+$[[./parts/preset.md]]
+$[[./parts/world.md]]
+## $@
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  return { output: [
+    'bot.name    : ' + String(ctx.get(['bot', 'name'])),
+    'bot.age     : ' + String(ctx.get(['bot', 'age'])),
+    'bot.traits  : ' + String(ctx.get(['bot', 'traits'])),
+    'bot.style   : ' + String(ctx.get(['bot', 'style'])),
+    'bot.setting : ' + String(ctx.get(['bot', 'setting'])),
+  ].join('\n') }
+}
+```

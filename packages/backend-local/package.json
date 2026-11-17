@@ -1,0 +1,75 @@
+{
+  "name": "@kerneldreams/backend-local",
+  "version": "0.1.0",
+  "description": "ProtocolBackend over a local directory: .mds sessions and workspace files, no network and no model; services host and a Tauri transport.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/backend-local"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./services": {
+      "types": "./dist/services/index.d.ts",
+      "import": "./dist/services/index.js",
+      "default": "./dist/services/index.js"
+    },
+    "./tauri": {
+      "types": "./dist/tauri/index.d.ts",
+      "import": "./dist/tauri/index.js",
+      "default": "./dist/tauri/index.js"
+    },
+    "./tauri/client": {
+      "types": "./dist/tauri/client.d.ts",
+      "import": "./dist/tauri/client.js"
+    },
+    "./tauri/host": {
+      "types": "./dist/tauri/host.d.ts",
+      "import": "./dist/tauri/host.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "docs"
+  ],
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "node -e \"const p=require('./package.json');const bad=Object.entries({...p.dependencies,...p.peerDependencies}).filter(([,v])=>String(v).startsWith('file:'));if(bad.length){console.error('publish blocked: file: deps '+bad.map(([k])=>k).join(', '));process.exit(1)}\""
+  },
+  "dependencies": {
+    "@kerneldreams/backend-fs": "0.1.0",
+    "@kerneldreams/backend-http": "0.1.0",
+    "@kerneldreams/chat-store": "0.1.0",
+    "@kerneldreams/nrd": "0.1.0",
+    "@kerneldreams/ui-protocol": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@tauri-apps/api": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tauri-apps/api": {
+      "optional": true
+    }
+  }
+}

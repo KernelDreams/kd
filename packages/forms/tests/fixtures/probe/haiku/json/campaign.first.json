@@ -1,0 +1,259 @@
+{
+  "editor": 1,
+  "id": "campaign",
+  "title": "Журнал кампании",
+  "schema": {
+    "type": "object",
+    "required": [
+      "title"
+    ],
+    "properties": {
+      "title": {
+        "type": "string",
+        "title": "Название кампании"
+      },
+      "system": {
+        "type": "string",
+        "enum": [
+          "fate",
+          "dnd5e",
+          "other"
+        ],
+        "title": "Система"
+      },
+      "started": {
+        "type": "string",
+        "title": "Начало"
+      },
+      "sessions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "title": "Название"
+            },
+            "date": {
+              "type": "string",
+              "title": "Дата"
+            },
+            "summary": {
+              "type": "string",
+              "title": "Итоги"
+            },
+            "scenes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "title": "Название"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "combat",
+                      "social",
+                      "explore"
+                    ],
+                    "title": "Тип"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "title": "Заметки"
+                  },
+                  "npcs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "NPC"
+                  },
+                  "initiative": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "title": "Имя"
+                        },
+                        "roll": {
+                          "type": "integer",
+                          "title": "Бросок"
+                        }
+                      }
+                    }
+                  },
+                  "clues": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "text": {
+                          "type": "string",
+                          "title": "Улика"
+                        },
+                        "found": {
+                          "type": "boolean",
+                          "title": "Найдена"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "layout": [
+    {
+      "node": "section",
+      "id": "campaign",
+      "title": "Кампания",
+      "children": [
+        {
+          "node": "field",
+          "path": "title",
+          "row": "r1"
+        },
+        {
+          "node": "field",
+          "path": "system",
+          "widget": "select",
+          "props": {
+            "labels": {
+              "fate": "Fate",
+              "dnd5e": "D&D 5e",
+              "other": "Другая"
+            }
+          },
+          "row": "r1"
+        },
+        {
+          "node": "field",
+          "path": "started",
+          "widget": "date"
+        }
+      ]
+    },
+    {
+      "node": "section",
+      "id": "sessions",
+      "title": "Сессии",
+      "children": [
+        {
+          "node": "repeat",
+          "path": "sessions",
+          "itemTitle": "title",
+          "children": [
+            {
+              "node": "field",
+              "path": "title",
+              "row": "r2"
+            },
+            {
+              "node": "field",
+              "path": "date",
+              "widget": "date",
+              "row": "r2"
+            },
+            {
+              "node": "field",
+              "path": "summary",
+              "widget": "markdown"
+            },
+            {
+              "node": "repeat",
+              "path": "scenes",
+              "itemTitle": "title",
+              "children": [
+                {
+                  "node": "field",
+                  "path": "title",
+                  "row": "r3"
+                },
+                {
+                  "node": "field",
+                  "path": "kind",
+                  "widget": "select",
+                  "props": {
+                    "labels": {
+                      "combat": "Бой",
+                      "social": "Социальная",
+                      "explore": "Исследование"
+                    }
+                  },
+                  "row": "r3"
+                },
+                {
+                  "node": "field",
+                  "path": "notes",
+                  "widget": "textarea",
+                  "props": {
+                    "rows": 3
+                  }
+                },
+                {
+                  "node": "field",
+                  "path": "npcs",
+                  "widget": "tags"
+                },
+                {
+                  "node": "repeat",
+                  "path": "initiative",
+                  "label": "Инициатива",
+                  "itemTitle": "name",
+                  "showIf": {
+                    "kind": [
+                      "combat"
+                    ]
+                  },
+                  "children": [
+                    {
+                      "node": "field",
+                      "path": "name",
+                      "row": "r4"
+                    },
+                    {
+                      "node": "field",
+                      "path": "roll",
+                      "widget": "number",
+                      "row": "r4"
+                    }
+                  ]
+                },
+                {
+                  "node": "repeat",
+                  "path": "clues",
+                  "label": "Улики",
+                  "itemTitle": "text",
+                  "children": [
+                    {
+                      "node": "field",
+                      "path": "text",
+                      "widget": "textarea",
+                      "props": {
+                        "rows": 2
+                      }
+                    },
+                    {
+                      "node": "field",
+                      "path": "found",
+                      "widget": "checkbox"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

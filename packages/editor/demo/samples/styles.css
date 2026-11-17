@@ -1,0 +1,17 @@
+:root {
+  --nre-accent: #8250df;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: 100vh;
+}
+
+.app > aside:hover {
+  background: color-mix(in srgb, var(--nre-accent) 8%, transparent);
+}
+
+@media (max-width: 640px) {
+  .app { grid-template-columns: 1fr; }
+}

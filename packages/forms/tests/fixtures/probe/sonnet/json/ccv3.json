@@ -1,0 +1,491 @@
+{
+  "editor": 1,
+  "id": "ccv3",
+  "title": "Карточка бота (Character Card V3)",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "spec": {
+        "type": "string",
+        "title": "spec",
+        "default": "chara_card_v3"
+      },
+      "spec_version": {
+        "type": "string",
+        "title": "spec_version",
+        "default": "3.0"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Имя"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Никнейм"
+          },
+          "description": {
+            "type": "string",
+            "title": "Описание"
+          },
+          "personality": {
+            "type": "string",
+            "title": "Характер"
+          },
+          "scenario": {
+            "type": "string",
+            "title": "Сценарий"
+          },
+          "first_mes": {
+            "type": "string",
+            "title": "Первое сообщение"
+          },
+          "mes_example": {
+            "type": "string",
+            "title": "Примеры диалога"
+          },
+          "alternate_greetings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Альтернативные гритинги"
+          },
+          "group_only_greetings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Гритинги для групп"
+          },
+          "system_prompt": {
+            "type": "string",
+            "title": "Системный промпт"
+          },
+          "post_history_instructions": {
+            "type": "string",
+            "title": "Инструкции после истории"
+          },
+          "creator_notes": {
+            "type": "string",
+            "title": "Заметки автора"
+          },
+          "creator": {
+            "type": "string",
+            "title": "Автор"
+          },
+          "character_version": {
+            "type": "string",
+            "title": "Версия персонажа"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Теги"
+          },
+          "extensions": {
+            "type": "object",
+            "title": "Расширения",
+            "properties": {
+              "nrchat": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "bot",
+                      "persona"
+                    ],
+                    "title": "Тип"
+                  }
+                }
+              }
+            }
+          },
+          "character_book": {
+            "type": "object",
+            "title": "Лорбук",
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "Название"
+              },
+              "scan_depth": {
+                "type": "integer",
+                "minimum": 0,
+                "title": "Глубина сканирования"
+              },
+              "token_budget": {
+                "type": "integer",
+                "minimum": 0,
+                "title": "Бюджет токенов"
+              },
+              "recursive_scanning": {
+                "type": "boolean",
+                "title": "Рекурсивное сканирование"
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Ключи"
+                    },
+                    "content": {
+                      "type": "string",
+                      "title": "Содержимое"
+                    },
+                    "enabled": {
+                      "type": "boolean",
+                      "default": true,
+                      "title": "Включена"
+                    },
+                    "insertion_order": {
+                      "type": "integer",
+                      "title": "Порядок вставки"
+                    },
+                    "case_sensitive": {
+                      "type": "boolean",
+                      "title": "Учитывать регистр"
+                    },
+                    "name": {
+                      "type": "string",
+                      "title": "Название"
+                    },
+                    "priority": {
+                      "type": "integer",
+                      "title": "Приоритет"
+                    },
+                    "comment": {
+                      "type": "string",
+                      "title": "Комментарий"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "title": "Тип"
+                },
+                "uri": {
+                  "type": "string",
+                  "title": "Изображение"
+                },
+                "name": {
+                  "type": "string",
+                  "title": "Название"
+                },
+                "ext": {
+                  "type": "string",
+                  "title": "Расширение"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "layout": [
+    {
+      "node": "section",
+      "id": "main",
+      "title": "Основное",
+      "children": [
+        {
+          "node": "field",
+          "path": "data.name",
+          "row": "r1"
+        },
+        {
+          "node": "field",
+          "path": "data.nickname",
+          "row": "r1"
+        },
+        {
+          "node": "field",
+          "path": "data.extensions.nrchat.kind",
+          "widget": "select",
+          "props": {
+            "labels": {
+              "bot": "Бот",
+              "persona": "Персона"
+            }
+          }
+        },
+        {
+          "node": "field",
+          "path": "data.description",
+          "widget": "textarea",
+          "props": {
+            "rows": 6
+          }
+        },
+        {
+          "node": "field",
+          "path": "data.personality",
+          "widget": "textarea",
+          "props": {
+            "rows": 4
+          }
+        },
+        {
+          "node": "field",
+          "path": "data.scenario",
+          "widget": "textarea",
+          "props": {
+            "rows": 4
+          }
+        },
+        {
+          "node": "field",
+          "path": "data.tags",
+          "widget": "tags"
+        }
+      ]
+    },
+    {
+      "node": "section",
+      "id": "dialogue",
+      "title": "Диалог",
+      "showIf": {
+        "data.extensions.nrchat.kind": [
+          "bot"
+        ]
+      },
+      "children": [
+        {
+          "node": "field",
+          "path": "data.first_mes",
+          "widget": "textarea",
+          "props": {
+            "rows": 8
+          }
+        },
+        {
+          "node": "field",
+          "path": "data.alternate_greetings",
+          "widget": "ccv3.greetings"
+        },
+        {
+          "node": "field",
+          "path": "data.group_only_greetings",
+          "widget": "ccv3.greetings"
+        },
+        {
+          "node": "field",
+          "path": "data.mes_example",
+          "widget": "textarea",
+          "props": {
+            "rows": 8
+          }
+        }
+      ]
+    },
+    {
+      "node": "section",
+      "id": "prompts",
+      "title": "Промпты",
+      "children": [
+        {
+          "node": "field",
+          "path": "data.system_prompt",
+          "widget": "textarea",
+          "props": {
+            "rows": 6
+          }
+        },
+        {
+          "node": "field",
+          "path": "data.post_history_instructions",
+          "widget": "textarea",
+          "props": {
+            "rows": 4
+          }
+        }
+      ]
+    },
+    {
+      "node": "section",
+      "id": "lorebook",
+      "title": "Лорбук",
+      "collapsed": true,
+      "children": [
+        {
+          "node": "field",
+          "path": "data.character_book.name"
+        },
+        {
+          "node": "field",
+          "path": "data.character_book.scan_depth",
+          "widget": "number",
+          "props": {
+            "min": 0
+          },
+          "row": "r2"
+        },
+        {
+          "node": "field",
+          "path": "data.character_book.token_budget",
+          "widget": "number",
+          "props": {
+            "min": 0
+          },
+          "row": "r2"
+        },
+        {
+          "node": "field",
+          "path": "data.character_book.recursive_scanning",
+          "widget": "checkbox",
+          "row": "r2"
+        },
+        {
+          "node": "repeat",
+          "path": "data.character_book.entries",
+          "label": "Записи",
+          "itemTitle": "name",
+          "children": [
+            {
+              "node": "field",
+              "path": "name",
+              "row": "r3"
+            },
+            {
+              "node": "field",
+              "path": "enabled",
+              "widget": "checkbox",
+              "row": "r3"
+            },
+            {
+              "node": "field",
+              "path": "keys",
+              "widget": "ccv3.lorebook-keys"
+            },
+            {
+              "node": "field",
+              "path": "content",
+              "widget": "textarea",
+              "props": {
+                "rows": 5
+              }
+            },
+            {
+              "node": "field",
+              "path": "insertion_order",
+              "widget": "number",
+              "row": "r4"
+            },
+            {
+              "node": "field",
+              "path": "priority",
+              "widget": "number",
+              "row": "r4"
+            },
+            {
+              "node": "field",
+              "path": "case_sensitive",
+              "widget": "checkbox",
+              "row": "r4"
+            },
+            {
+              "node": "field",
+              "path": "comment"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "node": "section",
+      "id": "assets",
+      "title": "Ассеты",
+      "collapsed": true,
+      "children": [
+        {
+          "node": "repeat",
+          "path": "data.assets",
+          "itemTitle": "name",
+          "children": [
+            {
+              "node": "field",
+              "path": "uri",
+              "widget": "image"
+            },
+            {
+              "node": "field",
+              "path": "type",
+              "row": "r5"
+            },
+            {
+              "node": "field",
+              "path": "name",
+              "row": "r5"
+            },
+            {
+              "node": "field",
+              "path": "ext",
+              "row": "r5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "node": "section",
+      "id": "meta",
+      "title": "Служебное",
+      "collapsed": true,
+      "children": [
+        {
+          "node": "field",
+          "path": "spec",
+          "row": "r6"
+        },
+        {
+          "node": "field",
+          "path": "spec_version",
+          "row": "r6"
+        },
+        {
+          "node": "field",
+          "path": "data.creator",
+          "row": "r7"
+        },
+        {
+          "node": "field",
+          "path": "data.character_version",
+          "row": "r7"
+        },
+        {
+          "node": "field",
+          "path": "data.creator_notes",
+          "widget": "textarea",
+          "props": {
+            "rows": 4
+          }
+        },
+        {
+          "node": "field",
+          "path": "data.extensions",
+          "widget": "json"
+        }
+      ]
+    }
+  ]
+}

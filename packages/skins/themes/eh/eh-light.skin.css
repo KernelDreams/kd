@@ -1,0 +1,66 @@
+/* @skin
+ * name: eh-light
+ * description: Emotion Hunters — светлая: тёплая бумага, графит, гранатовый акцент
+ * mode: light
+ */
+
+/*
+ * Набор тем площадки Emotion Hunters. Светлая — нейтральная основа под темы ботов:
+ * тема бота (слой «бот», theme.botCss) перекрывает палитру, ручки ниже — свои переменные
+ * --eh-*, чтобы инлайн-значение ручки не перебивало тему бота.
+ */
+/* @settings
+name: Emotion Hunters — светлая
+id: eh-light
+settings:
+    -
+        id: eh-accent
+        title: Акцент
+        description: имена, ссылки, кнопки; тема бота его перекрывает
+        type: variable-themed-color
+        format: hex
+        default-light: "#a3263c"
+        default-dark: "#e0708a"
+    -
+        id: eh-avatar
+        title: Аватар в ленте
+        type: variable-number-slider
+        default: 40
+        min: 28
+        max: 72
+        step: 4
+        format: px
+    -
+        id: eh-measure
+        title: Ширина колонки текста
+        type: variable-number-slider
+        default: 72
+        min: 56
+        max: 96
+        step: 4
+        format: ch
+*/
+
+[data-skin="eh-light"][data-mode="light"] {
+  --nr-bg: #faf7f2;
+  --nr-surface: #f2ede5;
+  --nr-raised: #ffffff;
+  --nr-line: #ddd4c7;
+  --nr-line-soft: #ebe4d9;
+  --nr-fg: #1f1b18;
+  --nr-muted: #625a52;
+  --nr-accent: var(--eh-accent, #a3263c);
+  --nr-accent-fg: #ffffff;
+  --nr-ok: #2f6b3a;
+  --nr-error: #a8281e;
+  --nr-shadow-pop: 0 8px 24px rgb(40 30 20 / 0.14);
+}
+[data-skin="eh-light"] {
+  --nr-font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --nr-font-body: Georgia, "PT Serif", serif;
+  --nr-avatar-size: var(--eh-avatar, 40px);
+  --nr-avatar-radius: 9999px;
+  --nr-measure: var(--eh-measure, 72ch);
+  --nr-em: #6b4f3f;
+}
+[data-skin="eh-light"] .nr-text em { color: var(--nr-em); }

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>nr-chat — артефакт с тулом страницы</title>
+  <style>
+    body { margin: 0; font: 14px system-ui, sans-serif; display: grid; grid-template-columns: 1fr 420px; height: 100vh; }
+    .app { padding: 20px; }
+    .app h1 { font-size: 18px; }
+    .count { font-size: 48px; font-weight: 700; margin: 12px 0; }
+    ul { padding-left: 20px; }
+    button { font: inherit; padding: 6px 12px; margin-right: 6px; }
+    #chat { border-left: 1px solid #ddd; padding: 8px; }
+    nr-chat { height: 100%; }
+  </style>
+  <script type="module" src="../dist/nr-chat.js"></script>
+</head>
+<body>
+  <div class="app">
+    <h1>Сцена «Лес»</h1>
+    <div>Шишек: <span class="count" id="count">0</span></div>
+    <button id="inc">+1 шишка</button>
+    <button id="add">Добавить дерево</button>
+    <label><input type="checkbox" id="ctx"> снимок страницы в каждый ход (onContext)</label>
+    <ul id="trees"></ul>
+  </div>
+  <div id="chat"></div>
+  <script type="module">
+    import { mount } from '../dist/nr-chat.js'
+    // Состояние «артефакта» — то, что модель узнаёт тулом get_state.
+    const state = { scene: 'Лес', cones: 0, trees: ['ель', 'сосна'] }
+    const q = new URLSearchParams(location.search)
+    if (q.get('cones')) state.cones = Number(q.get('cones'))
+    const render = () => {
+      document.getElementById('count').textContent = String(state.cones)
+      document.getElementById('trees').replaceChildren(...state.trees.map((t) => Object.assign(document.createElement('li'), { textContent: t })))
+    }
+    document.getElementById('inc').onclick = () => (state.cones++, render())
+    document.getElementById('add').onclick = () => (state.trees.push(`дерево ${state.trees.length + 1}`), render())
+    render()
+
+    const chat = mount(document.getElementById('chat'), {
+      backend: q.get('backend') ?? 'http://127.0.0.1:7800/api',
+      profile: q.get('profile') ?? 'agent',
+      ...(q.get('auth') ? { auth: q.get('auth') } : {}),
+    })
+    chat.id = 'chat-artifact'
+    chat.registerTool(
+      {
+        name: 'get_state',
+        description: 'Текущее состояние открытой сцены в редакторе пользователя: имя сцены, число шишек (cones), список деревьев (trees). Вызывай, когда спрашивают про сцену.',
+        schema: { type: 'object', properties: {}, additionalProperties: false },
+      },
+      () => ({ text: JSON.stringify(state), data: { ...state } }),
+    )
+    document.getElementById('ctx').onchange = (e) => chat.onContext(e.target.checked ? () => ({ ...state }) : undefined)
+    window.nrChat = chat
+  </script>
+</body>
+</html>

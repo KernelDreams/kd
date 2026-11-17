@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nr-editor demo</title>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <header class="bar">
+      <strong class="brand">nr-editor</strong>
+      <label class="ctl">
+        Theme
+        <select id="theme">
+          <option value="auto">auto</option>
+          <option value="light">light</option>
+          <option value="dark">dark</option>
+        </select>
+      </label>
+      <label class="ctl"><input type="checkbox" id="ts" /> TS service</label>
+      <label class="ctl"><input type="checkbox" id="ro" /> read-only</label>
+      <button id="dump" type="button">Dump</button>
+      <span id="status" class="status" aria-live="polite"></span>
+    </header>
+    <div class="main">
+      <nav id="files" class="files" aria-label="Samples"></nav>
+      <section class="pane">
+        <div id="editor" class="editor"></div>
+        <aside id="dump-panel" class="dump" hidden>
+          <div class="dump-head">
+            <span id="dump-result"></span>
+            <button id="dump-close" type="button" aria-label="Close">×</button>
+          </div>
+          <pre id="dump-text"></pre>
+        </aside>
+      </section>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

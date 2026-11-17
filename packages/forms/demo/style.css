@@ -1,0 +1,15 @@
+/* Демо: токены, скин parchment и Tailwind-мост — копия nrchat (`src/core/theme`), форме нужны утилиты `*-nr-*`. */
+@import 'tailwindcss';
+@import './theme/tokens.css';
+@import './theme/parchment.css';
+@import './theme/tailwind.css';
+@source '../src';
+
+html,
+body {
+  margin: 0;
+  background: var(--nr-bg);
+  color: var(--nr-fg);
+  font-family: var(--nr-font-ui);
+  -webkit-font-smoothing: antialiased;
+}

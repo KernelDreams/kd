@@ -1,0 +1,8 @@
+node_modules/
+dist/
+bin/
+.DS_Store
+
+# Рабочие директории исполнителей (CLAUDE.md — гигиена реп)
+.claude/
+.code/

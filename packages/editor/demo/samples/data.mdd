@@ -1,0 +1,35 @@
+@title: Tavern patrons
+@locale: en
+@count: 3
+@updated: 2026-10-10
+
+## @patron mira
+@name: Mira
+@age: 27
+@hostile: false
+@traits: @[curious, sharp-tongued]
+@stats: {str: 8, dex: 14, wit: 16}
+@nr-weight: 2
+@bio: @[[lore/mira.md#Bio]]
+
+Mira runs the card table. She owes @{patrons.borin.name} money.
+
+## @patron borin
+@name: Borin
+@age: 54
+@hostile: null
+@traits: @[loud, generous]
+
+### @item axe
+@damage: 7
+@// sentimental, never sells it
+
+## @@
+
+## @table encounters
+
+weight:number | tags:list(;) | rare:boolean!
+3 | drunk;loud | false
+1 | thief | true
+
+$model: foreign sigil — plain text in mdd

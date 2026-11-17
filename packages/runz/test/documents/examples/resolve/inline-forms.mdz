@@ -1,0 +1,21 @@
+$run: trace
+$who: мир
+
+## $source a
+$nr: {type: 'inline', parse: 'mdd'}
+
+@text: привет ${who}
+
+## $source b
+$nr: {type: 'inline'}
+$text: привет ${who}
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  return { output: [
+    'a.text (тело mdd)  : ' + String(ctx.get(['a', 'text'])),
+    'b.text (атрибуты)  : ' + String(ctx.get(['b', 'text'])),
+  ].join('\n') }
+}
+```

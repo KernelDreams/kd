@@ -1,0 +1,48 @@
+$run: trace
+
+Ботчат, шаг 3: граница «дерево ↔ текст» (text-cast-spec §2.1–§2.3).
+Тот же источник mdd, что в шаге 2 — здесь проверяется, ЧЕМ значение
+приезжает к потребителю: деревом в позиции целого значения и текстом
+внутри строки.
+
+## $source card
+$nr: {type: 'file', parse: 'mdd'}
+$path: ./bot.md
+
+## $source bot
+$nr: {type: 'inline'}
+$name: ${card.name}
+$lang: ru
+
+## $source probe
+$nr: {type: 'inline'}
+$whole: ${card.personality}
+$inline: персона — ${card.personality}
+$lang: ${card.meta.lang}
+$dump: дамп — ${bot}
+$empty: ${card.system_prompt}
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  const isTree = (v) =>
+    !!v && typeof v === 'object' &&
+    (typeof v.get === 'function' || typeof v.at === 'function')
+  const flat = (s) => s.replace(/\s+/g, ' ')
+  const whole = ctx.get(['probe', 'whole'])
+  const inline = String(ctx.get(['probe', 'inline']))
+  const viaCode = 'дамп — ' + String(ctx.get(['bot']))
+  const viaTpl = String(ctx.get(['probe', 'dump']))
+  const lines = [
+    'whole — дерево  : ' + isTree(whole),
+    'whole — текст   : ' + flat(String(whole)).slice(0, 14),
+    'адресация внутрь: ' + String(ctx.get(['probe', 'lang'])),
+    'в строке        : ' + flat(inline).slice(0, 26),
+    'дамп через ${}  : ' + viaTpl,
+    'дамп через код  : ' + viaCode,
+    'дамп совпал     : ' + (viaCode === viaTpl),
+    'пустое поле     : [' + String(ctx.get(['probe', 'empty'])) + ']',
+  ]
+  return { output: lines.join('\n') }
+}
+```

@@ -1,0 +1,10 @@
+/*
+ * Скин листа «пергамент» (spec §7): только пространство `--nr-sheet-*` — лист в нём, инспектор
+ * того же объекта остаётся в теме оболочки. В nrchat это обычный `.skin.css`.
+ */
+[data-sheet='parchment'] {
+  --nr-sheet-bg: #f3e6c8;
+  --nr-sheet-line: #c9b083;
+  --nr-sheet-accent: #7a3e12;
+  --nr-sheet-font: Georgia, 'Times New Roman', serif;
+}

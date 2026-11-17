@@ -1,0 +1,94 @@
+{
+  "name": "@kerneldreams/nodes",
+  "version": "0.1.0",
+  "description": "Schema editor core: schema model (spaces, entities, relations, composites) on the forms document, execution protocol, headless node-graph core and a React canvas (ports or free-form cards).",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/nodes"
+  },
+  "keywords": [
+    "node-editor",
+    "graph",
+    "nodes",
+    "react",
+    "pipeline",
+    "auto-layout",
+    "visual-programming"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "main": "./dist/core/index.js",
+  "types": "./dist/core/index.d.ts",
+  "exports": {
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./ui": {
+      "types": "./dist/ui/index.d.ts",
+      "import": "./dist/ui/index.js"
+    },
+    "./ui/styles": "./dist/ui/styles/nodes.css",
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "import": "./dist/schema/index.js"
+    },
+    "./protocol": {
+      "types": "./dist/protocol/index.d.ts",
+      "import": "./dist/protocol/index.js"
+    },
+    "./ui/stage.css": "./dist/ui/styles/stage.css"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "tsc -p tsconfig.build.json && node -e \"const fs=require('fs');fs.mkdirSync('dist/ui/styles',{recursive:true});for(const f of ['nodes.css','stage.css'])fs.copyFileSync('src/ui/styles/'+f,'dist/ui/styles/'+f)\"",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit && tsc -p demo/tsconfig.json",
+    "test": "vitest run",
+    "demo": "vite demo --port 5190 --strictPort",
+    "demo:build": "vite build demo",
+    "e2e": "playwright test",
+    "prepublishOnly": "node -e \"const p=require('./package.json');const bad=Object.entries({...p.dependencies,...p.peerDependencies}).filter(([,v])=>String(v).startsWith('file:'));if(bad.length){console.error('publish blocked: file: deps '+bad.map(([k])=>k).join(', '));process.exit(1)}\""
+  },
+  "peerDependencies": {
+    "react": ">=18 <20",
+    "@kerneldreams/forms": "0.1.0",
+    "@kerneldreams/nrd": "0.1.0",
+    "nunjucks": "^3.2.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^24.19.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.3.0",
+    "vite": "^7.0.0",
+    "vitest": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependenciesMeta": {
+    "@kerneldreams/forms": {
+      "optional": true
+    },
+    "@kerneldreams/nrd": {
+      "optional": true
+    },
+    "nunjucks": {
+      "optional": true
+    }
+  }
+}

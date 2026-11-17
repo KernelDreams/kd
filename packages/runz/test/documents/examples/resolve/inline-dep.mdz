@@ -1,0 +1,23 @@
+$run: trace
+
+Узкий тест: видит ли ТЕЛО inline-звена данные предыдущего звена.
+(в deps.mdz падало раньше — на атрибуте $path)
+
+## $source registry
+$nr: {type: 'file', parse: 'mdd'}
+$path: ./bots/registry.md
+
+## $source label
+$nr: {type: 'inline', parse: 'mdd'}
+
+@text: активен ${registry.active}
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  return { output: [
+    'registry.active : ' + String(ctx.get(['registry', 'active'])),
+    'label.text      : ' + String(ctx.get(['label', 'text'])),
+  ].join('\n') }
+}
+```

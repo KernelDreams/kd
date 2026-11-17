@@ -1,0 +1,2 @@
+{ "name": "theme-defaults", "publisher": "vscode", "license": "MIT",
+  "contributes": { "themes": [ { "label": "Dark Modern", "uiTheme": "vs-dark", "path": "./themes/dark_modern.json" } ] } }

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@kerneldreams/nrd": ["../nrd/dist/index.d.ts"],
+      "@kerneldreams/nrd/web": ["../nrd/dist/web/index.d.ts"],
+      "@kerneldreams/nrd/node": ["../nrd/dist/node/index.d.ts"],
+      "@kerneldreams/chat-store": ["../chat-store/dist/index.d.ts"],
+      "@kerneldreams/chat-store/memory": ["../chat-store/dist/memory/index.d.ts"]
+    }
+  },
+  "include": ["src", "test"],
+  "exclude": ["node_modules", "dist"]
+}

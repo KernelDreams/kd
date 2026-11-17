@@ -1,0 +1,31 @@
+$run: trace
+$card_path: ./card.json
+
+Ботчат, шаг 1: источник — сырой экспорт с чуба (json).
+`card` — сырьё как есть, `bot` — нормализованный вид под шаблон.
+Шаблон и цикл дальше НЕ знают, откуда пришли данные.
+
+## $source card
+$nr: {type: 'file', parse: 'json'}
+$path: ${card_path}
+
+## $source bot
+$nr: {type: 'inline'}
+$name: ${card.node.definition.name}
+$persona: ${card.node.definition.personality}
+$scenario: ${card.node.definition.scenario}
+$greeting: ${card.node.definition.first_message}
+$system: ${card.node.definition.system_prompt}
+
+## $action trace
+```ts
+export default async function (ctx, meta, helpers) {
+  const f = (k) => {
+    const v = ctx.get(['bot', k])
+    const s = v == null ? '' : String(v)
+    return '  ' + k.padEnd(9) + String(s.length).padStart(6) + '  ' + s.slice(0,52).replace(/\s+/g, ' ')
+  }
+  return { output: ['источник: card.json', '', '  поле        длина  начало']
+    .concat(['name','persona','scenario','greeting','system'].map(f)).join('\n') }
+}
+```

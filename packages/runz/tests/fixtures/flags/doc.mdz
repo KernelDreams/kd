@@ -1,0 +1,5 @@
+$description: doc — фикстура, документ с объявленными флагами.
+$flags: $[name]
+
+## $step hi
+$shell: echo hi ${name}

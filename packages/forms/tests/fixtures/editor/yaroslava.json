@@ -1,0 +1,23 @@
+{
+  "name": "Ярослава",
+  "portrait": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 3'><rect width='2' height='3' fill='%23985518'/><circle cx='1' cy='1' r='0.5' fill='%23fffaf0'/></svg>",
+  "description": "Травница из-под Радома, ходит по болотам за тем, чего другие боятся.",
+  "refresh": 3,
+  "fatePoints": 3,
+  "highConcept": "Травница, которая слышит болото",
+  "trouble": "Долг перед Лешим",
+  "aspects": [
+    { "_id": "asp001", "text": "Сестра пропала на Купалу" },
+    { "_id": "asp002", "text": "Знаю тропы через трясину" }
+  ],
+  "skills": {
+    "academics": 0, "athletics": 2, "burglary": 0, "contacts": 1, "crafts": 1, "deceive": 0, "drive": 0,
+    "empathy": 3, "fight": 0, "investigate": 2, "lore": 4, "notice": 3, "physique": 2, "provoke": 0,
+    "rapport": 1, "resources": 0, "shoot": 0, "stealth": 2, "will": 1
+  },
+  "stunts": [
+    { "_id": "stn001", "name": "Отвар от лихорадки", "description": "+2 к Lore, когда лечу травами." }
+  ],
+  "stress": { "physical": [false, false, false, false], "mental": [false, false, false, false] },
+  "consequences": { "mild": "", "moderate": "", "severe": "" }
+}

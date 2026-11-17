@@ -1,0 +1,27 @@
+$app: Выходы
+$outputs: lyrics, style, pic, ghost, extra
+
+## $step lyrics
+```ts
+export default async () => ({ output: 'куплет' })
+```
+
+## $step style
+```ts
+export default async () => ({ output: 'рок, быстрый темп' })
+```
+
+## $step pic
+```ts
+export default async () => ({ output: 'готово', outputs: [{ type: 'image', path: '/tmp/a.png' }] })
+```
+
+## $step multi
+```ts
+export default async () => ({ outputs: [{ type: 'text', text: 'скрыто', name: 'hidden' }, { type: 'text', text: 'доп', name: 'extra' }] })
+```
+
+## $step traced
+```ts
+export default async () => ({ outputs: [{ type: 'text', text: '[]', name: '_trace' }] })
+```

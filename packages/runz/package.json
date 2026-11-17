@@ -1,0 +1,58 @@
+{
+  "name": "@kerneldreams/runz",
+  "version": "0.1.0",
+  "description": "runz CLI: run TypeScript scripts and NRD documents (mdz), config chain, built-in scripts, runz test.",
+  "license": "MIT",
+  "author": "Denys Vynohradskyi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KernelDreams/kd.git",
+    "directory": "packages/runz"
+  },
+  "type": "module",
+  "bin": {
+    "runz": "./bin/runz.ts"
+  },
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "bin",
+    "scripts",
+    "skills",
+    "docs"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kerneldreams/artifacts": "0.1.0",
+    "@kerneldreams/backend-fs": "0.1.0",
+    "@kerneldreams/backend-http": "0.1.0",
+    "@kerneldreams/backend-local": "0.1.0",
+    "@kerneldreams/chat-store": "0.1.0",
+    "@kerneldreams/comfy-client": "0.1.0",
+    "@kerneldreams/engine": "0.1.0",
+    "@kerneldreams/nrd": "0.1.0",
+    "@kerneldreams/runz-run": "0.1.0",
+    "@kerneldreams/runz-runtime": "0.1.0",
+    "@kerneldreams/ui-protocol": "0.1.0",
+    "@kerneldreams/web": "0.1.0",
+    "@kerneldreams/web-tools": "0.1.0",
+    "@toon-format/toon": "^2.3.0",
+    "maxrects-packer": "^2.7.3",
+    "nunjucks": "^3.2.4",
+    "pngjs": "^7.0.0",
+    "puppeteer-core": "^25.3.0",
+    "undici": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/nunjucks": "^3.2.6",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

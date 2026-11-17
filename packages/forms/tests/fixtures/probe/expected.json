@@ -1,0 +1,276 @@
+{
+ "reference/fate.html": {
+  "ok": true,
+  "errors": []
+ },
+ "reference/fate.json": {
+  "ok": true,
+  "errors": []
+ },
+ "reference/fate.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "reference/fate.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/html/campaign.first.html": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/html/campaign.html": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/html/ccv3.html": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/html/edit.html": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/html/fate.html": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/json/campaign.first.json": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/json/campaign.json": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/json/ccv3.json": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/json/edit.json": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/json/fate.json": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/mdz/campaign.first.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/mdz/campaign.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/mdz/ccv3.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/mdz/edit.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/mdz/fate.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/yaml/campaign.first.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/yaml/campaign.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/yaml/ccv3.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/yaml/edit.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "haiku/yaml/fate.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/html/campaign.first.html": {
+  "ok": false,
+  "errors": [
+   "computed foundClues: expr не считается: (unknown path)",
+   "рендер: (unknown path)\n  TypeError: arr.filter is not a function"
+  ]
+ },
+ "opus/html/campaign.html": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/html/ccv3.html": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/html/edit.html": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/html/fate.html": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/json/campaign.first.json": {
+  "ok": false,
+  "errors": [
+   "computed foundClues: expr не считается: не число: \"{% set acc %}{% for s in item.scenes %}{% for c in s.clues %}{% if c.found %}x{% endif %}{% endfor %}{% endfor %}{% endset %}0\"",
+   "рендер: не число: \"{% set acc %}{% for s in item.scenes %}{% for c in s.clues %}{% if c.found %}x{% endif %}{% endfor %}{% endfor %}{% endset %}0\""
+  ]
+ },
+ "opus/json/campaign.json": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/json/ccv3.json": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/json/edit.json": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/json/fate.json": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/mdz/campaign.first.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/mdz/campaign.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/mdz/ccv3.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/mdz/edit.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/mdz/fate.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/yaml/campaign.first.yaml": {
+  "ok": false,
+  "errors": [
+   "computed foundClues: expr не считается: не число: \"{% filter length %}{% for s in item.scenes %}{% for c in s.clues %}{% if c.found %}x{% endif %}{% endfor %}{% endfor %}{% endfilter %}\"",
+   "рендер: не число: \"{% filter length %}{% for s in item.scenes %}{% for c in s.clues %}{% if c.found %}x{% endif %}{% endfor %}{% endfor %}{% endfilter %}\""
+  ]
+ },
+ "opus/yaml/campaign.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/yaml/ccv3.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/yaml/edit.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "opus/yaml/fate.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/html/campaign.first.html": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/html/campaign.html": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/html/ccv3.html": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/html/edit.html": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/html/fate.html": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/json/campaign.first.json": {
+  "ok": false,
+  "errors": [
+   "computed foundClues: expr не считается: (unknown path)",
+   "рендер: (unknown path)\n  TypeError: arr.filter is not a function"
+  ]
+ },
+ "sonnet/json/campaign.json": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/json/ccv3.json": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/json/edit.json": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/json/fate.json": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/mdz/campaign.first.mdz": {
+  "ok": false,
+  "errors": [
+   "computed cluesFound: expr не считается: (unknown path)",
+   "рендер: (unknown path)\n  Error: filter not found: map"
+  ]
+ },
+ "sonnet/mdz/campaign.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/mdz/ccv3.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/mdz/edit.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/mdz/fate.mdz": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/yaml/campaign.first.yaml": {
+  "ok": false,
+  "errors": [
+   "computed foundClues: expr не считается: (unknown path)",
+   "рендер: (unknown path)\n  Error: filter not found: map"
+  ]
+ },
+ "sonnet/yaml/campaign.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/yaml/ccv3.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/yaml/edit.yaml": {
+  "ok": true,
+  "errors": []
+ },
+ "sonnet/yaml/fate.yaml": {
+  "ok": true,
+  "errors": []
+ }
+}
